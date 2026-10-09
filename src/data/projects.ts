@@ -7,9 +7,17 @@ export type Project = {
   slug: string;
   title: string;
   caption: T;
+  /** Live site; the card opens it in a new tab */
+  url?: string;
   image?: string;
   video?: string;
-  /** Placeholder background until a real image is added */
+  /**
+   * Live phone mockup instead of a still image: a tall full-page screenshot that
+   * scrolls inside two phones on hover, with the site's header and bottom bar
+   * overlaid. `starts` are the scroll positions (CSS px) each phone begins at.
+   */
+  phones?: { page: string; pageHeight: number; top: string; bottom: string; starts: [number, number] };
+  /** Card background (and placeholder colour until a real image is added) */
   color: string;
 };
 
@@ -20,7 +28,25 @@ const soon: T = {
 };
 
 export const projects: Project[] = [
-  { slug: 'project-01', title: 'Project 01', caption: soon, color: '#4FC59A' },
+  {
+    slug: 'kimchi',
+    title: 'KIMCHI',
+    caption: {
+      en: 'Online menu and ordering website for KIMCHI, a Korean street-food spot in Dushanbe',
+      ru: 'Онлайн-меню и сайт для заказов корейского стритфуда KIMCHI в Душанбе',
+      tg: 'Менюи онлайн ва сайти фармоиш барои KIMCHI — ғизои кӯчагии кореягӣ дар Душанбе',
+    },
+    url: 'https://kimchi-menu-dushanbe.netlify.app/',
+    image: '/projects/kimchi/cover.webp',
+    phones: {
+      page: '/projects/kimchi/page.webp',
+      pageHeight: 5200,
+      top: '/projects/kimchi/top.png',
+      bottom: '/projects/kimchi/bottom.png',
+      starts: [0, 700],
+    },
+    color: '#E5161E',
+  },
   { slug: 'project-02', title: 'Project 02', caption: soon, color: '#8C7CF0' },
   { slug: 'project-03', title: 'Project 03', caption: soon, color: '#F6F1E9' },
   { slug: 'project-04', title: 'Project 04', caption: soon, color: '#2C2A33' },
@@ -32,9 +58,10 @@ export const projects: Project[] = [
 export const showreel = { video: '' };
 
 // Client logos (SVG/PNG in public/clients/). Empty `logo` shows a placeholder.
-export const clients: { name: string; logo?: string }[] = Array.from({ length: 12 }, (_, i) => ({
-  name: `Client ${String(i + 1).padStart(2, '0')}`,
-}));
+export const clients: { name: string; logo?: string }[] = [
+  { name: 'KIMCHI', logo: '/clients/kimchi.svg' },
+  ...Array.from({ length: 11 }, (_, i) => ({ name: `Client ${String(i + 2).padStart(2, '0')}` })),
+];
 
 export type Testimonial = { name: string; role: string; text: T; color: 'mint' | 'lavender' | 'cream' };
 

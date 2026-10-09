@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import Button from '../../components/Button.astro';
 import Mark from '../../components/Mark.astro';
+import PhoneMock from '../../components/PhoneMock.astro';
 import { ui, locales, type Locale } from '../../i18n/ui';
 import { projects, clients, testimonials, contact, showreel } from '../../data/projects';
 
@@ -81,7 +82,9 @@ const icons = [
     <div class="clients__grid">
       {clients.map((c) => (
         <div class="clients__item" data-stagger>
-          {c.logo ? <img src={c.logo} alt={c.name} loading="lazy" /> : <span class="clients__ph"><Mark ink="currentColor" accent="currentColor" />{c.name}</span>}
+          {c.logo
+            ? <span class="clients__brand"><img src={c.logo} alt="" loading="lazy" />{c.name}</span>
+            : <span class="clients__ph"><Mark ink="currentColor" accent="currentColor" />{c.name}</span>}
         </div>
       ))}
     </div>
@@ -95,10 +98,15 @@ const icons = [
         {columns.map((col, ci) => (
           <div class="work__col" data-speed={ci === 1 ? '1' : '0'}>
             {col.map((p) => (
-              <a class="card" href="#contact" data-cursor={t.view}>
+              <a
+                class="card" href={p.url ?? '#contact'} data-cursor="arrow"
+                target={p.url ? '_blank' : undefined} rel={p.url ? 'noopener' : undefined}
+                aria-label={p.url ? `${p.title}: ${p.caption[lang]}` : undefined}
+              >
                 <div class="card__media" style={`--c:${p.color}`}>
                   <div class="card__inner">
-                    {p.video ? <video src={p.video} autoplay muted loop playsinline></video>
+                    {p.phones ? <PhoneMock {...p.phones} color={p.color} />
+                      : p.video ? <video src={p.video} autoplay muted loop playsinline></video>
                       : p.image ? <img src={p.image} alt={p.title} loading="lazy" />
                       : <div class="card__ph"><Mark ink="rgba(31,29,36,.88)" accent="#fff" /><span>{p.title}</span></div>}
                   </div>

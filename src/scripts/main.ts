@@ -189,10 +189,12 @@ if (finePointer) {
   document.addEventListener('pointerover', (e) => {
     const target = e.target as Element;
     const view = target.closest<HTMLElement>('[data-cursor]');
+    const arrow = view?.dataset.cursor === 'arrow';
     const link = target.closest('a, button');
-    cursor.classList.toggle('is-view', !!view);
+    cursor.classList.toggle('is-arrow', arrow);
+    cursor.classList.toggle('is-view', !!view && !arrow);
     cursor.classList.toggle('is-link', !view && !!link);
-    if (view) label.textContent = view.dataset.cursor!;
+    if (view && !arrow) label.textContent = view.dataset.cursor!;
   });
 
   $$('.magnetic').forEach((el) => {
@@ -238,6 +240,7 @@ if (!reduced) {
   });
 
   initServices();
+  initMocks();
 
   // Work cards rise in; right column drifts for a parallax offset
   $$('.card').forEach((card) =>
@@ -377,6 +380,31 @@ function initServices() {
   // trigger positions with the cards open, then restore the real state.
   ScrollTrigger.addEventListener('refreshInit', () => { measure(); cards.forEach((c) => render(c, 1)); });
   ScrollTrigger.addEventListener('refresh', () => { cards.forEach((c) => (c.p = -1)); update(); });
+}
+
+/* ---------------- Project phone mockups ---------------- */
+// The screens scroll through the client's site while the card is hovered (on touch
+// screens: while it is in view), then glide back to the start.
+function initMocks() {
+  $$('[data-mock]').forEach((mock) => {
+    const card = mock.closest<HTMLElement>('.card')!;
+    const tl = gsap.timeline({ paused: true, repeat: -1, yoyo: true, repeatDelay: 0.6 });
+    $$('.mock__page', mock).forEach((img, i) => {
+      img.style.transform = '';
+      tl.fromTo(img,
+        { yPercent: -Number(img.dataset.start) },
+        { yPercent: -Number(img.dataset.end), duration: 6.5, ease: 'sine.inOut' }, i * 0.25);
+    });
+    let rewind: gsap.core.Tween | undefined;
+    const play = () => { rewind?.kill(); tl.play(); };
+    const stop = () => { tl.pause(); rewind = gsap.to(tl, { totalTime: 0, duration: 1.2, ease: 'expo.out' }); };
+    if (finePointer) {
+      card.addEventListener('pointerenter', play);
+      card.addEventListener('pointerleave', stop);
+    } else {
+      ScrollTrigger.create({ trigger: card, start: 'top 75%', end: 'bottom 25%', onToggle: (st) => (st.isActive ? play() : stop()) });
+    }
+  });
 }
 
 /* ---------------- FAQ accordion ---------------- */
