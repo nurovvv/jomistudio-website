@@ -1,0 +1,80 @@
+---
+import '../styles/global.css';
+import { ui, locales, type Locale } from '../i18n/ui';
+import { contact } from '../data/projects';
+import Button from '../components/Button.astro';
+import Mark from '../components/Mark.astro';
+
+interface Props { lang: Locale }
+const { lang } = Astro.props;
+const t = ui[lang];
+const links = [
+  ['#services', t.nav.services],
+  ['#work', t.nav.work],
+  ['#about', t.nav.about],
+  ['#faq', t.nav.faq],
+];
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jomi Studio</title>
+    <meta name="description" content={t.meta} />
+    <meta property="og:title" content="Jomi Studio" />
+    <meta property="og:description" content={t.meta} />
+    <meta property="og:image" content="/brand/jomi_avatar_light.svg" />
+    <meta name="theme-color" content="#FFFFFF" />
+    <link rel="icon" type="image/svg+xml" href="/brand/jomi_mark_light.svg" />
+    {locales.map((l) => <link rel="alternate" hreflang={l} href={`https://jomistudio.tj/${l}/`} />)}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet" />
+    <noscript><style>.curtain{display:none}</style></noscript>
+  </head>
+  <body>
+    <!-- Loader + page-transition curtain -->
+    <div class="curtain" aria-hidden="true">
+      <Mark ink="#F6F1E9" class="curtain__mark" />
+    </div>
+
+    <div class="cursor" aria-hidden="true"><span class="cursor__label"></span></div>
+
+    <header class="header">
+      <a href={`/${lang}/`} class="header__logo" aria-label="Jomi Studio">
+        <img src="/brand/jomi_logo_light.svg" alt="Jomi Studio" width="152" height="60" />
+      </a>
+      <nav class="header__nav">
+        {links.map(([href, label]) => (
+          <a href={href} class="roll" data-text={label}><span>{label}</span></a>
+        ))}
+      </nav>
+      <div class="header__right">
+        <div class="langs">
+          {locales.map((l) => <a href={`/${l}/`} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{l}</a>)}
+        </div>
+        <Button href="#contact" label={t.nav.contact} class="header__cta" />
+        <button class="burger" aria-label={t.menu} aria-expanded="false">
+          <span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <div class="menu" aria-hidden="true">
+      <nav class="menu__nav">
+        {[...links, ['#contact', t.nav.contact]].map(([href, label]) => <a href={href}><span>{label}</span></a>)}
+      </nav>
+      <div class="menu__foot">
+        <div class="langs">
+          {locales.map((l) => <a href={`/${l}/`} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{l}</a>)}
+        </div>
+        <a href={`mailto:${contact.email}`}>{contact.email}</a>
+        <a href={contact.instagram} target="_blank" rel="noopener">Instagram</a>
+      </div>
+    </div>
+
+    <main><slot /></main>
+    <script>import '../scripts/main.ts';</script>
+  </body>
+</html>

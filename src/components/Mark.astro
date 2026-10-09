@@ -1,0 +1,11 @@
+---
+// Jomi mark: three shapes + green circle. Classes allow animating each shape.
+interface Props { ink?: string; accent?: string; class?: string }
+const { ink = '#1F1D24', accent = '#4FC59A', class: cls } = Astro.props;
+---
+<svg class:list={['mark', cls]} viewBox="-8 -8 116 116" aria-hidden="true">
+  <rect class="mark__s" x="0" y="0" width="44" height="44" fill={ink} />
+  <rect class="mark__s" x="56" y="0" width="44" height="44" rx="9" fill={ink} />
+  <rect class="mark__s" x="0" y="56" width="44" height="44" rx="16" fill={ink} />
+  <circle class="mark__s" cx="78" cy="78" r="22" fill={accent} />
+</svg>

@@ -1,0 +1,21 @@
+---
+// Pill button with a rolling-text + fill hover effect.
+interface Props {
+  href: string;
+  label: string;
+  variant?: 'dark' | 'light' | 'outline' | 'outline-light';
+  arrow?: boolean;
+  class?: string;
+  [key: string]: any;
+}
+const { href, label, variant = 'dark', arrow = false, class: cls, ...rest } = Astro.props;
+---
+<a href={href} class:list={['btn', `btn--${variant}`, 'magnetic', cls]} {...rest}>
+  <span class="btn__fill" aria-hidden="true"></span>
+  <span class="btn__roll" data-text={label}><span>{label}</span></span>
+  {arrow && (
+    <span class="btn__arrow" aria-hidden="true">
+      <svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" /></svg>
+    </span>
+  )}
+</a>

@@ -1,0 +1,210 @@
+---
+import Base from '../../layouts/Base.astro';
+import Button from '../../components/Button.astro';
+import Mark from '../../components/Mark.astro';
+import { ui, locales, type Locale } from '../../i18n/ui';
+import { projects, clients, testimonials, contact, showreel } from '../../data/projects';
+
+export function getStaticPaths() {
+  return locales.map((lang) => ({ params: { lang } }));
+}
+const lang = Astro.params.lang as Locale;
+const t = ui[lang];
+const pad = (n: number) => String(n + 1).padStart(2, '0');
+const columns = [projects.filter((_, i) => i % 2 === 0), projects.filter((_, i) => i % 2 === 1)];
+const icons = [
+  '<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>',
+  '<circle cx="12" cy="8" r="5"/><path d="M8.5 12.5 7 21l5-3 5 3-1.5-8.5"/>',
+  '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+  '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  '<path d="M21 4 3 11l6 2 2 6 3-4 5 4z"/>',
+];
+---
+<Base lang={lang}>
+  <!-- HERO -->
+  <section class="hero">
+    <h1 class="hero__title" data-split="hero">
+      {t.hero.title.map((l) => <span class="hero__line">{l}</span>)}
+    </h1>
+    <p class="hero__sub" data-hero-fade>{t.hero.sub}</p>
+    <div class="hero__media-wrap">
+      <div class="hero__media" data-cursor={t.showreel}>
+        {showreel.video ? (
+          <video src={showreel.video} autoplay muted loop playsinline></video>
+        ) : (
+          <div class="reel">
+            <div class="reel__glow reel__glow--1"></div>
+            <div class="reel__glow reel__glow--2"></div>
+            <div class="reel__grid">
+              <i class="reel__s"></i><i class="reel__s"></i><i class="reel__s"></i><i class="reel__s reel__s--accent"></i>
+            </div>
+            <span class="reel__tag">{t.showreel} · {new Date().getFullYear()}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- INTRO -->
+  <section class="intro wrap" id="about">
+    <span class="eyebrow">{t.intro.label}</span>
+    <p class="intro__text" data-scrub-words>{t.intro.text}</p>
+  </section>
+
+  <!-- SERVICES: cards expand as they scroll into view -->
+  <section class="services wrap" id="services">
+    {t.services.map((s, i) => (
+      <article class="srv" data-art={i % 5}>
+        <div class="srv__art" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <header class="srv__head">
+          <h3 class="srv__title">{s.title}</h3>
+          <span class="srv__num">{pad(i)}</span>
+        </header>
+        <div class="srv__body">
+          <div class="srv__inner">
+            <p class="srv__desc">{s.desc}</p>
+            <a href="#contact" class="srv__link">
+              <span class="roll" data-text={t.explore}><span>{t.explore}</span></span>
+              <i class="srv__arrow"><svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></i>
+            </a>
+          </div>
+        </div>
+      </article>
+    ))}
+  </section>
+
+  <!-- CLIENTS -->
+  <section class="clients wrap">
+    <h2 class="clients__title" data-fade>{t.clients}</h2>
+    <div class="clients__grid">
+      {clients.map((c) => (
+        <div class="clients__item" data-stagger>
+          {c.logo ? <img src={c.logo} alt={c.name} loading="lazy" /> : <span class="clients__ph"><Mark ink="currentColor" accent="currentColor" />{c.name}</span>}
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section class="work" id="work">
+    <div class="wrap">
+      <h2 class="h2 work__title" data-split>{t.work.title}</h2>
+      <div class="work__cols">
+        {columns.map((col, ci) => (
+          <div class="work__col" data-speed={ci === 1 ? '1' : '0'}>
+            {col.map((p) => (
+              <a class="card" href="#contact" data-cursor={t.view}>
+                <div class="card__media" style={`--c:${p.color}`}>
+                  <div class="card__inner">
+                    {p.video ? <video src={p.video} autoplay muted loop playsinline></video>
+                      : p.image ? <img src={p.image} alt={p.title} loading="lazy" />
+                      : <div class="card__ph"><Mark ink="rgba(31,29,36,.88)" accent="#fff" /><span>{p.title}</span></div>}
+                  </div>
+                </div>
+                <p class="card__caption">{p.caption[lang]}</p>
+              </a>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div class="work__more" data-fade>
+        <Button href="#contact" label={t.work.all} variant="outline-light" />
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS: scattered, draggable cards -->
+  <section class="reviews">
+    <h2 class="h2 reviews__title" data-split>{t.testimonials.title}</h2>
+    <div class="reviews__board">
+      {testimonials.map((r, i) => (
+        <figure class:list={['review', `review--${r.color}`]} data-i={i}>
+          <svg class="review__q" viewBox="0 0 32 24" aria-hidden="true"><path d="M0 24V14C0 6 4 1 12 0l1 4c-4 1-6 4-6 8h6v12zm19 0V14c0-8 4-13 12-14l1 4c-4 1-6 4-6 8h6v12z" fill="currentColor"/></svg>
+          <blockquote>{r.text[lang]}</blockquote>
+          <figcaption><Mark class="review__logo" /><span><b>{r.name}</b>{r.role}</span></figcaption>
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  <!-- WHY -->
+  <section class="why wrap">
+    <div class="why__top">
+      <span class="eyebrow">{t.why.label}</span>
+      <p class="why__text" data-scrub-words>{t.why.text}</p>
+    </div>
+    <div class="why__grid">
+      {t.why.cards.map((c, i) => (
+        <div class:list={['stat', `stat--${i % 3}`]} data-stagger>
+          <svg class="stat__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" set:html={icons[i]} />
+          {'value' in c && c.value !== undefined
+            ? <div class="stat__body"><span class="stat__value"><span data-count={c.value}>{c.value}</span>{c.suffix}</span><span class="stat__label">{c.label}</span></div>
+            : <div class="stat__body"><span class="stat__big">{c.label}</span></div>}
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq wrap" id="faq">
+    <h2 class="h2" data-split>{t.faq.title}</h2>
+    <div class="faq__list">
+      {t.faq.items.map((f) => (
+        <div class="faq__item" data-fade>
+          <button class="faq__q" aria-expanded="false">
+            <span>{f.q}</span><i class="faq__icon" aria-hidden="true"></i>
+          </button>
+          <div class="faq__a"><p>{f.a}</p></div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- FOOTER / CTA -->
+  <footer class="footer" id="contact">
+    <div class="footer__rings" aria-hidden="true">
+      {Array.from({ length: 7 }).map((_, i) => <span style={`--i:${i}`}></span>)}
+    </div>
+    <div class="footer__glow" aria-hidden="true"></div>
+    <div class="footer__cta">
+      <h2 class="footer__title" data-split>{t.footer.cta.map((l) => <span class="hero__line">{l}</span>)}</h2>
+      <p class="footer__sub" data-fade>{t.footer.sub}</p>
+      <div data-fade><Button href={`mailto:${contact.email}`} label={t.footer.button} variant="light" /></div>
+    </div>
+
+    <div class="footer__bottom wrap">
+      <div class="footer__contacts">
+        <div>
+          <Button href={`mailto:${contact.email}`} label={contact.email} variant="outline-light" />
+          <span class="footer__meta">{t.footer.office}</span>
+        </div>
+        {contact.phone && (
+          <div>
+            <Button href={`tel:${contact.phone.replace(/\s/g, '')}`} label={contact.phone} variant="outline-light" />
+          </div>
+        )}
+      </div>
+      <nav class="footer__nav">
+        <a href="#services" class="roll" data-text={t.nav.services}><span>{t.nav.services}</span></a>
+        <a href="#work" class="roll" data-text={t.nav.work}><span>{t.nav.work}</span></a>
+        <a href="#about" class="roll" data-text={t.nav.about}><span>{t.nav.about}</span></a>
+        <a href="#faq" class="roll" data-text={t.nav.faq}><span>{t.nav.faq}</span></a>
+      </nav>
+      <div class="footer__legal">
+        <span>© {new Date().getFullYear()} Jomi Studio. {t.footer.rights}</span>
+        <div class="socials">
+          <a href={contact.instagram} target="_blank" rel="noopener" aria-label="Instagram" class="social magnetic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/></svg>
+          </a>
+          {contact.telegram && (
+            <a href={contact.telegram} target="_blank" rel="noopener" aria-label="Telegram" class="social magnetic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 4 3 11l6 2 2 6 3-4 5 4z"/></svg>
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  </footer>
+</Base>
