@@ -230,7 +230,7 @@ if (!reduced) {
     gsap.from(el, { y: 50, autoAlpha: 0, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 92%' } }),
   );
 
-  // Staggered groups (client logos, stat cards)
+  // Staggered group (client logos)
   gsap.set('[data-stagger]', { y: 50, autoAlpha: 0 });
   ScrollTrigger.batch('[data-stagger]', {
     start: 'top 92%',
@@ -304,14 +304,21 @@ if (!reduced) {
     };
   });
 
-  // Count-up numbers
-  $$('[data-count]').forEach((el) => {
-    const end = Number(el.dataset.count);
-    const obj = { v: 0 };
-    gsap.to(obj, {
-      v: end, duration: 2, ease: 'power3.out', onUpdate: () => (el.textContent = String(Math.round(obj.v))),
-      scrollTrigger: { trigger: el, start: 'top 90%' },
-    });
+  // Why cards grow from nothing one after another, once, when the grid comes into
+  // view; their numbers count up at the same time.
+  gsap.set('.stat', { scale: 0, autoAlpha: 0 });
+  ScrollTrigger.create({
+    trigger: '.why__grid', start: 'top 85%', once: true,
+    onEnter: () => {
+      gsap.to('.stat', { scale: 1, autoAlpha: 1, duration: 1.3, stagger: 0.09, ease: 'expo.out' });
+      $$('[data-count]').forEach((el) => {
+        const obj = { v: 0 };
+        gsap.to(obj, {
+          v: Number(el.dataset.count), duration: 2, delay: 0.2, ease: 'power3.out',
+          onUpdate: () => (el.textContent = String(Math.round(obj.v))),
+        });
+      });
+    },
   });
 
   // Footer: content rises from underneath, rings breathe
