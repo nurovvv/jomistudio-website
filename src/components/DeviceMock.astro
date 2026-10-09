@@ -1,0 +1,63 @@
+---
+// A laptop and a phone on a coloured backdrop showing a real site. Each screen is a
+// tall full-page screenshot under the site's own header (and bottom bar) strips;
+// main.ts scrolls them while the card is hovered (or in view on touch screens).
+// Sized in cqw so the scene scales with the card.
+export type Screen = {
+  /** Tall full-page screenshot */
+  page: string;
+  /** Height of that screenshot in CSS px of the captured viewport */
+  pageHeight: number;
+  /** Viewport height the screen shows, in the same CSS px (900 laptop, 844 phone) */
+  viewHeight: number;
+  /** Sticky header / fixed bottom bar strips laid over the scrolling page */
+  top?: string;
+  bottom?: string;
+  /** Scroll position (CSS px) the screen starts at, and how far it scrolls on hover */
+  start: number;
+  travel?: number;
+};
+interface Props { laptop: Screen; phone: Screen; color: string }
+const { laptop, phone, color } = Astro.props;
+
+const pct = (px: number, s: Screen) => ((px / s.pageHeight) * 100).toFixed(3);
+const range = (s: Screen) => ({
+  start: pct(s.start, s),
+  end: pct(Math.min(s.start + (s.travel ?? 1900), s.pageHeight - s.viewHeight), s),
+});
+const l = range(laptop);
+const p = range(phone);
+---
+<div class="mock" style={`--bg:${color}`} data-mock>
+  <span class="mock__ring" style="--s:58.3"></span>
+  <span class="mock__ring" style="--s:87.5"></span>
+  <span class="mock__ring" style="--s:116.7"></span>
+
+  <div class="mock__laptop">
+    <div class="mock__lid">
+      <div class="mock__display">
+        <img class="mock__page" src={laptop.page} alt="" loading="lazy" decoding="async"
+          data-start={l.start} data-end={l.end} style={`transform: translateY(-${l.start}%)`} />
+        {laptop.top && <img class="mock__bar mock__bar--top" src={laptop.top} alt="" loading="lazy" />}
+      </div>
+      <span class="mock__notch"></span>
+    </div>
+    <div class="mock__base"><span class="mock__scoop"></span></div>
+  </div>
+
+  <div class="mock__phone">
+    <div class="mock__screen">
+      <div class="mock__status" aria-hidden="true">
+        <span>9:41</span>
+        <span class="mock__icons"><i></i><i></i><i></i><i></i><b></b></span>
+      </div>
+      <div class="mock__view">
+        <img class="mock__page" src={phone.page} alt="" loading="lazy" decoding="async"
+          data-start={p.start} data-end={p.end} style={`transform: translateY(-${p.start}%)`} />
+        {phone.top && <img class="mock__bar mock__bar--top" src={phone.top} alt="" loading="lazy" />}
+        {phone.bottom && <img class="mock__bar mock__bar--bottom" src={phone.bottom} alt="" loading="lazy" />}
+      </div>
+      <span class="mock__island"></span>
+    </div>
+  </div>
+</div>

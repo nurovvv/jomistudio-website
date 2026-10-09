@@ -1,6 +1,8 @@
 // Site content that changes often: projects, testimonials, clients, contacts.
 // Images/videos go in public/projects/ (e.g. image: '/projects/my-project.jpg').
 
+import type { Screen } from '../components/DeviceMock.astro';
+
 type T = { en: string; ru: string; tg: string };
 
 export type Project = {
@@ -12,11 +14,10 @@ export type Project = {
   image?: string;
   video?: string;
   /**
-   * Live phone mockup instead of a still image: a tall full-page screenshot that
-   * scrolls inside two phones on hover, with the site's header and bottom bar
-   * overlaid. `starts` are the scroll positions (CSS px) each phone begins at.
+   * Live laptop + phone mockup instead of a still image (see DeviceMock.astro):
+   * each screen scrolls through a tall screenshot of the site on hover.
    */
-  phones?: { page: string; pageHeight: number; top: string; bottom: string; starts: [number, number] };
+  mockup?: { laptop: Screen; phone: Screen };
   /** Card background (and placeholder colour until a real image is added) */
   color: string;
 };
@@ -38,12 +39,24 @@ export const projects: Project[] = [
     },
     url: 'https://kimchi-menu-dushanbe.netlify.app/',
     image: '/projects/kimchi/cover.webp',
-    phones: {
-      page: '/projects/kimchi/page.webp',
-      pageHeight: 5200,
-      top: '/projects/kimchi/top.png',
-      bottom: '/projects/kimchi/bottom.png',
-      starts: [0, 700],
+    mockup: {
+      laptop: {
+        page: '/projects/kimchi/desktop.webp',
+        pageHeight: 4200,
+        viewHeight: 900,
+        top: '/projects/kimchi/desktop-top.png',
+        start: 0,
+        travel: 1800,
+      },
+      phone: {
+        page: '/projects/kimchi/mobile.webp',
+        pageHeight: 5200,
+        viewHeight: 844,
+        top: '/projects/kimchi/mobile-top.png',
+        bottom: '/projects/kimchi/mobile-bottom.png',
+        start: 700,
+        travel: 1900,
+      },
     },
     color: '#E5161E',
   },
