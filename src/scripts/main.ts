@@ -168,16 +168,33 @@ burger.addEventListener('click', () => {
 });
 addEventListener('keydown', (e) => e.key === 'Escape' && closeMenu());
 
-/* ---------------- Cursor bubble + magnetic elements ---------------- */
+/* ---------------- Cursor dot + magnetic elements ---------------- */
 if (finePointer) {
   const cursor = $('.cursor');
   const label = $('.cursor__label', cursor);
-  const xTo = gsap.quickTo(cursor, 'x', { duration: 0.5, ease: 'power3' });
-  const yTo = gsap.quickTo(cursor, 'y', { duration: 0.5, ease: 'power3' });
-  addEventListener('pointermove', (e) => { xTo(e.clientX); yTo(e.clientY); });
-  $$('[data-cursor]').forEach((el) => {
-    el.addEventListener('pointerenter', () => { label.textContent = el.dataset.cursor!; gsap.to(cursor, { scale: 1, duration: 0.5, ease: 'expo.out' }); });
-    el.addEventListener('pointerleave', () => gsap.to(cursor, { scale: 0, duration: 0.4, ease: 'expo.out' }));
+  root.classList.add('has-cursor');
+  const xTo = gsap.quickTo(cursor, 'x', { duration: 0.2, ease: 'power3' });
+  const yTo = gsap.quickTo(cursor, 'y', { duration: 0.2, ease: 'power3' });
+  let shown = false;
+  addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    if (!shown) { gsap.set(cursor, { x: e.clientX, y: e.clientY }); shown = true; }
+    cursor.classList.remove('is-hidden');
+    xTo(e.clientX);
+    yTo(e.clientY);
+  });
+  // Hide when the pointer leaves the window, show again on return
+  root.addEventListener('mouseleave', () => cursor.classList.add('is-hidden'));
+  addEventListener('pointerdown', () => cursor.classList.add('is-down'));
+  addEventListener('pointerup', () => cursor.classList.remove('is-down'));
+  // One delegated listener decides the cursor state for whatever is under the pointer
+  document.addEventListener('pointerover', (e) => {
+    const target = e.target as Element;
+    const view = target.closest<HTMLElement>('[data-cursor]');
+    const link = target.closest('a, button, .review');
+    cursor.classList.toggle('is-view', !!view);
+    cursor.classList.toggle('is-link', !view && !!link);
+    if (view) label.textContent = view.dataset.cursor!;
   });
 
   $$('.magnetic').forEach((el) => {

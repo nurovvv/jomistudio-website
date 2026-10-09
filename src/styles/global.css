@@ -87,14 +87,27 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
 .btn, .btn__fill, .btn--outline-light { transition: color .4s var(--ease); }
 .btn .btn__fill { transition: transform .6s var(--ease); }
 
-/* ============ Cursor bubble ============ */
-.cursor {
-  position: fixed; left: 0; top: 0; z-index: 1500; pointer-events: none;
-  width: 92px; height: 92px; margin: -46px 0 0 -46px; border-radius: 50%;
-  background: var(--green); color: var(--ink); display: grid; place-items: center;
-  font-size: 14px; font-weight: 500; transform: scale(0);
+/* ============ Cursor dot ============ */
+/* A dot that follows the pointer. It inverts what's under it, grows over links,
+   and turns into a green labelled bubble over [data-cursor] elements. */
+.cursor { position: fixed; left: 0; top: 0; z-index: 1500; pointer-events: none; mix-blend-mode: difference; }
+.cursor__dot {
+  position: absolute; left: 0; top: 0; width: 12px; height: 12px; border-radius: 50%;
+  translate: -50% -50%; background: #fff; display: grid; place-items: center; overflow: hidden;
+  transition: width .5s var(--ease-out), height .5s var(--ease-out), background .3s, opacity .3s, scale .3s var(--ease-out);
 }
+.cursor__label { font-size: 14px; font-weight: 500; color: var(--ink); white-space: nowrap; opacity: 0; transition: opacity .25s; }
+.cursor.is-link .cursor__dot { width: 52px; height: 52px; }
+.cursor.is-view { mix-blend-mode: normal; }
+.cursor.is-view .cursor__dot { width: 92px; height: 92px; background: var(--green); }
+.cursor.is-view .cursor__label { opacity: 1; transition-delay: .1s; }
+.cursor.is-down .cursor__dot { scale: .75; }
+.cursor.is-hidden .cursor__dot { opacity: 0; }
 @media (hover: none), (pointer: coarse) { .cursor { display: none; } }
+/* The dot replaces the system pointer on mouse devices */
+@media (hover: hover) and (pointer: fine) {
+  html.has-cursor, html.has-cursor * { cursor: none !important; }
+}
 
 /* ============ Header ============ */
 .header {
