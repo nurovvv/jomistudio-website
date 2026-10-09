@@ -380,20 +380,26 @@ function initServices() {
 }
 
 /* ---------------- FAQ accordion ---------------- */
-$$('.faq__item').forEach((item) => {
-  const btn = $<HTMLButtonElement>('.faq__q', item);
+// Row height eases open, the answer fades up into place, and the "+" turns into
+// an "x" (CSS). Opening one question closes the others.
+function setFaq(item: HTMLElement, open: boolean) {
   const panel = $('.faq__a', item);
-  btn.addEventListener('click', () => {
+  const text = $('p', panel);
+  item.classList.toggle('is-open', open);
+  $('.faq__q', item).setAttribute('aria-expanded', String(open));
+  gsap.to(panel, {
+    height: open ? 'auto' : 0, duration: reduced ? 0 : 0.8, ease: 'expo.inOut', overwrite: 'auto',
+    onComplete: () => ScrollTrigger.refresh(),
+  });
+  if (reduced) return;
+  if (open) gsap.fromTo(text, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.9, delay: 0.2, ease: 'expo.out', overwrite: 'auto' });
+  else gsap.to(text, { autoAlpha: 0, y: 8, duration: 0.35, ease: 'power2.in', overwrite: 'auto' });
+}
+$$('.faq__item').forEach((item) => {
+  $('.faq__q', item).addEventListener('click', () => {
     const open = !item.classList.contains('is-open');
-    $$('.faq__item.is-open').forEach((other) => {
-      if (other === item) return;
-      other.classList.remove('is-open');
-      $('.faq__q', other).setAttribute('aria-expanded', 'false');
-      gsap.to($('.faq__a', other), { height: 0, duration: 0.6, ease: 'power3.inOut' });
-    });
-    item.classList.toggle('is-open', open);
-    btn.setAttribute('aria-expanded', String(open));
-    gsap.to(panel, { height: open ? 'auto' : 0, duration: 0.7, ease: 'power3.inOut', onComplete: () => ScrollTrigger.refresh() });
+    $$('.faq__item.is-open').forEach((other) => other !== item && setFaq(other, false));
+    setFaq(item, open);
   });
 });
 

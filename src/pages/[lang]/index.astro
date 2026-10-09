@@ -148,17 +148,19 @@ const icons = [
   </section>
 
   <!-- FAQ -->
-  <section class="faq wrap" id="faq">
-    <h2 class="h2" data-split>{t.faq.title}</h2>
-    <div class="faq__list">
-      {t.faq.items.map((f) => (
-        <div class="faq__item" data-fade>
-          <button class="faq__q" aria-expanded="false">
-            <span>{f.q}</span><i class="faq__icon" aria-hidden="true"></i>
-          </button>
-          <div class="faq__a"><p>{f.a}</p></div>
-        </div>
-      ))}
+  <section class="faq" id="faq">
+    <div class="wrap">
+      <h2 class="h2" data-split>{t.faq.title}</h2>
+      <div class="faq__list">
+        {t.faq.items.map((f) => (
+          <div class="faq__item" data-fade>
+            <button class="faq__q" aria-expanded="false">
+              <span>{f.q}</span><i class="faq__icon" aria-hidden="true"></i>
+            </button>
+            <div class="faq__a"><p>{f.a}</p></div>
+          </div>
+        ))}
+      </div>
     </div>
   </section>
 
