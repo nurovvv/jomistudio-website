@@ -242,9 +242,13 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
 .clients { padding-bottom: clamp(100px, 14vw, 180px); text-align: center; }
 .clients__title { font-size: clamp(18px, 1.6vw, 22px); font-weight: 500; margin-bottom: clamp(36px, 5vw, 64px); }
 .clients__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(28px, 4vw, 56px) 20px; }
-.clients__item { display: grid; place-items: center; height: 48px; }
-.clients__brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; letter-spacing: .02em; color: #6f6b75; transition: color .4s; }
-.clients__brand img { height: 30px; width: auto; filter: grayscale(1); opacity: .8; transition: filter .4s, opacity .4s; }
+.clients__item { display: grid; place-items: center; min-height: 64px; }
+.clients__brand {
+  display: flex; align-items: center; gap: 14px; padding: 8px 12px;
+  font-weight: 700; font-size: clamp(18px, 1.6vw, 22px); letter-spacing: .02em; color: #6f6b75; transition: color .4s;
+}
+.clients__brand img { height: clamp(48px, 4.4vw, 60px); width: auto; filter: grayscale(1); opacity: .8; transition: filter .4s, opacity .4s, transform .6s var(--ease-out); }
+.clients__brand:hover img { transform: scale(1.06); }
 .clients__brand:hover { color: var(--ink); }
 .clients__brand:hover img { filter: none; opacity: 1; }
 .clients__ph { display: flex; align-items: center; gap: 8px; color: #b5b2ba; font-weight: 600; font-size: 15px; letter-spacing: -.01em; }

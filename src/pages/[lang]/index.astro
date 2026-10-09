@@ -83,7 +83,9 @@ const icons = [
       {clients.map((c) => (
         <div class="clients__item" data-stagger>
           {c.logo
-            ? <span class="clients__brand"><img src={c.logo} alt="" loading="lazy" />{c.name}</span>
+            ? c.url
+              ? <a class="clients__brand" href={c.url} target="_blank" rel="noopener" data-cursor="arrow"><img src={c.logo} alt="" loading="lazy" />{c.name}</a>
+              : <span class="clients__brand"><img src={c.logo} alt="" loading="lazy" />{c.name}</span>
             : <span class="clients__ph"><Mark ink="currentColor" accent="currentColor" />{c.name}</span>}
         </div>
       ))}

@@ -57,9 +57,10 @@ export const projects: Project[] = [
 // Showreel shown in the hero. Leave empty to show the animated brand placeholder.
 export const showreel = { video: '' };
 
-// Client logos (SVG/PNG in public/clients/). Empty `logo` shows a placeholder.
-export const clients: { name: string; logo?: string }[] = [
-  { name: 'KIMCHI', logo: '/clients/kimchi.svg' },
+// Client logos (SVG/PNG in public/clients/). Empty `logo` shows a placeholder;
+// `url` makes the logo a link to the client's site (opens in a new tab).
+export const clients: { name: string; logo?: string; url?: string }[] = [
+  { name: 'KIMCHI', logo: '/clients/kimchi.svg', url: 'https://kimchi-menu-dushanbe.netlify.app/' },
   ...Array.from({ length: 11 }, (_, i) => ({ name: `Client ${String(i + 2).padStart(2, '0')}` })),
 ];
 
