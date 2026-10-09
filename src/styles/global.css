@@ -263,6 +263,8 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
 .work__title { margin-bottom: clamp(48px, 7vw, 96px); max-width: 1000px; margin-inline: auto; }
 .work__cols { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px, 3vw, 48px); max-width: 1000px; margin: 0 auto; }
 .work__col { display: flex; flex-direction: column; gap: clamp(48px, 7vw, 100px); }
+/* A single project sits centred instead of leaving an empty second column */
+.work__cols--single { grid-template-columns: minmax(0, 520px); justify-content: center; }
 .work__col:nth-child(2) { padding-top: clamp(80px, 14vw, 200px); }
 .card { display: block; }
 .card__media { border-radius: var(--radius); overflow: hidden; aspect-ratio: 4 / 5; background: var(--c); transform: translateZ(0); }

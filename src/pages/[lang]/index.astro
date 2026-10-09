@@ -12,7 +12,7 @@ export function getStaticPaths() {
 const lang = Astro.params.lang as Locale;
 const t = ui[lang];
 const pad = (n: number) => String(n + 1).padStart(2, '0');
-const columns = [projects.filter((_, i) => i % 2 === 0), projects.filter((_, i) => i % 2 === 1)];
+const columns = [projects.filter((_, i) => i % 2 === 0), projects.filter((_, i) => i % 2 === 1)].filter((c) => c.length);
 const icons = [
   '<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>',
   '<circle cx="12" cy="8" r="5"/><path d="M8.5 12.5 7 21l5-3 5 3-1.5-8.5"/>',
@@ -96,7 +96,7 @@ const icons = [
   <section class="work" id="work">
     <div class="wrap">
       <h2 class="h2 work__title" data-split>{t.work.title}</h2>
-      <div class="work__cols">
+      <div class:list={['work__cols', { 'work__cols--single': columns.length === 1 }]}>
         {columns.map((col, ci) => (
           <div class="work__col" data-speed={ci === 1 ? '1' : '0'}>
             {col.map((p) => (
@@ -119,9 +119,11 @@ const icons = [
           </div>
         ))}
       </div>
-      <div class="work__more" data-fade>
-        <Button href="#contact" label={t.work.all} variant="outline-light" />
-      </div>
+      {projects.length > 1 && (
+        <div class="work__more" data-fade>
+          <Button href="#contact" label={t.work.all} variant="outline-light" />
+        </div>
+      )}
     </div>
   </section>
 

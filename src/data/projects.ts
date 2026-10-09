@@ -22,12 +22,6 @@ export type Project = {
   color: string;
 };
 
-const soon: T = {
-  en: 'Project description coming soon',
-  ru: 'Описание проекта скоро появится',
-  tg: 'Тавсифи лоиҳа ба наздикӣ',
-};
-
 export const projects: Project[] = [
   {
     slug: 'kimchi',
@@ -60,11 +54,6 @@ export const projects: Project[] = [
     },
     color: '#E5161E',
   },
-  { slug: 'project-02', title: 'Project 02', caption: soon, color: '#8C7CF0' },
-  { slug: 'project-03', title: 'Project 03', caption: soon, color: '#F6F1E9' },
-  { slug: 'project-04', title: 'Project 04', caption: soon, color: '#2C2A33' },
-  { slug: 'project-05', title: 'Project 05', caption: soon, color: '#F2B84B' },
-  { slug: 'project-06', title: 'Project 06', caption: soon, color: '#E7E2F7' },
 ];
 
 // Showreel shown in the hero. Leave empty to show the animated brand placeholder.

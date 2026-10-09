@@ -248,6 +248,7 @@ if (!reduced) {
   );
   const mm = gsap.matchMedia();
   mm.add('(min-width: 701px)', () => {
+    if (!document.querySelector('.work__col[data-speed="1"]')) return;
     gsap.to('.work__col[data-speed="1"]', {
       y: -160, ease: 'none',
       scrollTrigger: { trigger: '.work__cols', start: 'top bottom', end: 'bottom top', scrub: true },
