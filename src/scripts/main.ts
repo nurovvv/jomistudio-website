@@ -243,13 +243,19 @@ if (reduced) {
     onEnter: (els) => gsap.to(els, { y: 0, autoAlpha: 1, duration: 1.1, stagger: 0.07, ease: 'expo.out' }),
   });
 
-  // Service cards expand into dark cards as they reach the viewport
-  $$('.srv').forEach((card) =>
-    ScrollTrigger.create({
-      trigger: card, start: 'top 78%', once: true,
-      onEnter: () => { card.classList.add('is-open'); refreshSoon(); },
-    }),
-  );
+  // Service cards open when their top passes 78% of the viewport and close again
+  // when scrolled back below it. IntersectionObserver reads live layout, so it
+  // stays correct while the cards above change height.
+  const srvObserver = new IntersectionObserver((entries) => {
+    entries.forEach(({ target, boundingClientRect, rootBounds }) => {
+      const line = rootBounds ? rootBounds.bottom : innerHeight * 0.78;
+      const open = boundingClientRect.top < line;
+      if (target.classList.contains('is-open') === open) return;
+      target.classList.toggle('is-open', open);
+      refreshSoon();
+    });
+  }, { rootMargin: '0px 0px -22% 0px' });
+  $$('.srv').forEach((card) => srvObserver.observe(card));
 
   // Work cards rise in; right column drifts for a parallax offset
   $$('.card').forEach((card) =>
