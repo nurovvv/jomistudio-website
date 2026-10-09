@@ -137,7 +137,7 @@ const icons = [
     </div>
     <div class="why__grid">
       {t.why.cards.map((c, i) => (
-        <div class:list={['stat', `stat--${i % 3}`]} data-stagger>
+        <div class:list={['stat', 'value' in c && c.value !== undefined ? 'stat--num' : 'stat--text']} data-stagger>
           <svg class="stat__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" set:html={icons[i]} />
           {'value' in c && c.value !== undefined
             ? <div class="stat__body"><span class="stat__value"><span data-count={c.value}>{c.value}</span>{c.suffix}</span><span class="stat__label">{c.label}</span></div>

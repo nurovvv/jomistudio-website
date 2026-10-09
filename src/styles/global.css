@@ -305,24 +305,31 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
 .why { padding: clamp(60px, 8vw, 100px) 0 clamp(80px, 10vw, 140px); }
 .why__top { display: grid; grid-template-columns: 1fr 1.6fr; gap: 40px; padding-top: 28px; border-top: 1px solid var(--line); }
 .why__text { font-size: clamp(18px, 1.6vw, 24px); line-height: 1.4; letter-spacing: -.01em; font-weight: 500; }
-.why__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: clamp(50px, 6vw, 80px); }
+/* Bento grid: three cards on the first row, two wider cards below, all one height.
+   Icon sits top-left, content is pinned to the bottom. Number cards are mint. */
+.why__grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-top: clamp(50px, 6vw, 80px); }
 .stat {
-  border-radius: var(--radius); padding: clamp(22px, 2.4vw, 32px); min-height: clamp(220px, 22vw, 300px);
-  display: flex; flex-direction: column; justify-content: space-between; gap: 30px;
+  grid-column: span 2; border-radius: var(--radius); padding: clamp(24px, 2.6vw, 36px);
+  min-height: clamp(240px, 23vw, 330px);
+  display: flex; flex-direction: column; justify-content: space-between; gap: 32px;
 }
-.stat--0 { background: var(--mint); }
-.stat--1 { background: var(--lavender); }
-.stat--2 { background: var(--cream); }
-.stat__icon { width: 26px; }
-.stat__value { display: block; font-size: clamp(48px, 5.6vw, 80px); font-weight: 500; letter-spacing: -.04em; line-height: 1; }
-.stat__label { display: block; margin-top: 12px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; font-weight: 500; }
-.stat__big { display: block; font-size: clamp(20px, 1.9vw, 28px); font-weight: 500; letter-spacing: -.02em; line-height: 1.2; max-width: 280px; }
-.why__grid .stat:nth-child(4) { grid-column: span 1; }
+.stat:nth-child(n + 4) { grid-column: span 3; }
+.stat--num { background: var(--mint); }
+.stat--text { background: #F2F2F6; }
+.stat__icon { width: 28px; }
+.stat__value { display: block; font-size: clamp(56px, 6.2vw, 92px); font-weight: 500; letter-spacing: -.045em; line-height: .95; }
+.stat__label { display: block; margin-top: 14px; font-size: 13px; text-transform: uppercase; letter-spacing: .02em; font-weight: 500; }
+.stat__big { display: block; font-size: clamp(22px, 2vw, 30px); font-weight: 500; letter-spacing: -.025em; line-height: 1.2; max-width: 300px; }
 @media (max-width: 860px) {
   .why__top { grid-template-columns: 1fr; gap: 16px; }
   .why__grid { grid-template-columns: 1fr 1fr; }
+  .stat, .stat:nth-child(n + 4) { grid-column: span 1; }
+  .stat:last-child:nth-child(odd) { grid-column: span 2; }
 }
-@media (max-width: 520px) { .why__grid { grid-template-columns: 1fr; } .stat { min-height: 180px; } }
+@media (max-width: 520px) {
+  .why__grid { grid-template-columns: 1fr; }
+  .stat, .stat:nth-child(n + 4), .stat:last-child:nth-child(odd) { grid-column: span 1; min-height: 200px; }
+}
 
 /* ============ FAQ ============ */
 .faq { padding-bottom: clamp(100px, 12vw, 160px); }
