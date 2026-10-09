@@ -207,12 +207,7 @@ if (finePointer) {
 }
 
 /* ---------------- Scroll animations ---------------- */
-let refreshTimer = 0;
-const refreshSoon = (ms = 950) => { clearTimeout(refreshTimer); refreshTimer = window.setTimeout(() => ScrollTrigger.refresh(), ms); };
-
-if (reduced) {
-  $$('.srv').forEach((s) => s.classList.add('is-open'));
-} else {
+if (!reduced) {
   // Headings: words rise from a mask
   splits.forEach((words, el) => {
     if (el.classList.contains('hero__title')) return;
@@ -243,19 +238,7 @@ if (reduced) {
     onEnter: (els) => gsap.to(els, { y: 0, autoAlpha: 1, duration: 1.1, stagger: 0.07, ease: 'expo.out' }),
   });
 
-  // Service cards open when their top passes 78% of the viewport and close again
-  // when scrolled back below it. IntersectionObserver reads live layout, so it
-  // stays correct while the cards above change height.
-  const srvObserver = new IntersectionObserver((entries) => {
-    entries.forEach(({ target, boundingClientRect, rootBounds }) => {
-      const line = rootBounds ? rootBounds.bottom : innerHeight * 0.78;
-      const open = boundingClientRect.top < line;
-      if (target.classList.contains('is-open') === open) return;
-      target.classList.toggle('is-open', open);
-      refreshSoon();
-    });
-  }, { rootMargin: '0px 0px -22% 0px' });
-  $$('.srv').forEach((card) => srvObserver.observe(card));
+  initServices();
 
   // Work cards rise in; right column drifts for a parallax offset
   $$('.card').forEach((card) =>
@@ -301,6 +284,56 @@ if (reduced) {
     scrollTrigger: { trigger: '.footer', start: 'top bottom', end: 'top 20%', scrub: true },
   });
   gsap.to('.footer__rings span', { scale: 1.06, duration: 2.6, repeat: -1, yoyo: true, ease: 'sine.inOut', stagger: { each: 0.25, from: 'start' } });
+}
+
+/* ---------------- Services: cards open and close with scroll position ---------------- */
+// A card's openness follows where it sits on screen: closed while its top is below
+// 72% of the viewport, fully open once it reaches 32%, and partly open in between.
+// Scrolling back up plays the same motion in reverse. Positions are read live, so
+// cards above changing height never throw the others off.
+function initServices() {
+  const cards = $$('.srv').map((card) => ({
+    card,
+    body: $('.srv__body', card),
+    inner: $('.srv__inner', card),
+    art: $('.srv__art', card),
+    fade: $$('.srv__desc, .srv__link', card),
+    h: 0,
+    p: -1,
+  }));
+  const bg = gsap.utils.interpolate('#EFEFF1', '#1F1D24');
+  const fg = gsap.utils.interpolate('#9A97A0', '#FFFFFF');
+  const ease = gsap.parseEase('power2.inOut');
+  const clamp = gsap.utils.clamp(0, 1);
+
+  const render = (c: (typeof cards)[number], p: number) => {
+    if (Math.abs(c.p - p) < 0.0005) return;
+    c.p = p;
+    const t = clamp((p - 0.45) / 0.55); // text fades in over the second half
+    c.card.style.backgroundColor = bg(p);
+    c.card.style.color = fg(p);
+    c.body.style.height = `${(p * c.h).toFixed(2)}px`;
+    c.art.style.opacity = String(p);
+    c.fade.forEach((el) => {
+      el.style.opacity = String(t);
+      el.style.transform = `translateY(${((1 - t) * 24).toFixed(2)}px)`;
+    });
+  };
+  const measure = () => cards.forEach((c) => { c.h = c.inner.offsetHeight; c.p = -1; });
+  const update = () => {
+    const vh = innerHeight;
+    const tops = cards.map((c) => c.card.getBoundingClientRect().top); // read all, then write
+    cards.forEach((c, i) => render(c, ease(clamp((vh * 0.72 - tops[i]) / (vh * 0.4)))));
+  };
+
+  measure();
+  update();
+  if (lenis) lenis.on('scroll', update);
+  else addEventListener('scroll', update, { passive: true });
+  // Sections below are only reached once every card is open, so measure their
+  // trigger positions with the cards open, then restore the real state.
+  ScrollTrigger.addEventListener('refreshInit', () => { measure(); cards.forEach((c) => render(c, 1)); });
+  ScrollTrigger.addEventListener('refresh', () => { cards.forEach((c) => (c.p = -1)); update(); });
 }
 
 /* ---------------- FAQ accordion ---------------- */

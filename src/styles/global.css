@@ -15,7 +15,7 @@
   --radius: clamp(16px, 1.6vw, 24px);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; overflow-anchor: none; }
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-stopped { overflow: hidden; }
@@ -194,31 +194,25 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
 .services { display: grid; gap: 14px; padding-bottom: clamp(80px, 12vw, 160px); }
 .srv {
   position: relative; overflow: hidden; border-radius: var(--radius);
-  background: var(--grey); color: #9a97a0; padding: clamp(22px, 2.6vw, 36px) clamp(22px, 3vw, 44px);
-  transition: background .8s var(--ease), color .8s var(--ease);
+  background: var(--ink); color: #fff; padding: clamp(22px, 2.6vw, 36px) clamp(22px, 3vw, 44px);
 }
-.srv.is-open { background: var(--ink); color: #fff; }
+/* Open state is the default; main.ts drives the in-between states from scroll position */
 .srv__head { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: baseline; gap: 20px; }
 .srv__title { font-size: clamp(24px, 2.6vw, 38px); font-weight: 500; letter-spacing: -.025em; line-height: 1.1; }
 .srv__num { font-size: 14px; opacity: .6; }
-.srv__body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .9s var(--ease); position: relative; z-index: 1; }
-.srv.is-open .srv__body { grid-template-rows: 1fr; }
-.srv__inner { overflow: hidden; }
-.srv__desc { max-width: 440px; margin-top: 22px; font-size: 16px; color: rgba(255,255,255,.72); }
-.srv__link { display: inline-flex; align-items: center; gap: 12px; margin: 34px 0 6px; font-size: 14px; font-weight: 500; }
+.srv__body { position: relative; z-index: 1; overflow: hidden; }
+.srv__inner { display: flow-root; padding: 22px 0 6px; }
+.srv__desc { max-width: 440px; font-size: 16px; color: rgba(255,255,255,.72); }
+.srv__link { display: inline-flex; align-items: center; gap: 12px; margin-top: 34px; font-size: 14px; font-weight: 500; }
 .srv__arrow {
   width: 30px; height: 30px; border-radius: 50%; background: #fff; color: var(--ink);
   display: grid; place-items: center; transition: transform .5s var(--ease), background .3s;
 }
 .srv__arrow svg { width: 13px; }
 .srv__link:hover .srv__arrow { transform: rotate(-45deg); background: var(--green); }
-.srv__desc, .srv__link { opacity: 0; transform: translateY(20px); transition: opacity .6s .25s, transform .9s .25s var(--ease-out); }
-.srv.is-open .srv__desc, .srv.is-open .srv__link { opacity: 1; transform: none; }
-.srv.is-open .srv__link { transition-delay: .35s; }
 
 /* Card art: concentric brand shapes with glow */
-.srv__art { position: absolute; inset: 0; opacity: 0; transition: opacity 1s var(--ease); pointer-events: none; }
-.srv.is-open .srv__art { opacity: 1; }
+.srv__art { position: absolute; inset: 0; pointer-events: none; }
 .srv__art span {
   position: absolute; right: 8%; top: 50%; width: calc(var(--s) * 1%); aspect-ratio: 1;
   translate: 50% -50%; border: 1px solid rgba(255,255,255,.08);
