@@ -1,9 +1,8 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Draggable } from 'gsap/Draggable';
 import Lenis from 'lenis';
 
-gsap.registerPlugin(ScrollTrigger, Draggable);
+gsap.registerPlugin(ScrollTrigger);
 
 const $ = <T extends Element = HTMLElement>(s: string, root: ParentNode = document) => root.querySelector<T>(s)!;
 const $$ = <T extends Element = HTMLElement>(s: string, root: ParentNode = document) => [...root.querySelectorAll<T>(s)];
@@ -190,7 +189,7 @@ if (finePointer) {
   document.addEventListener('pointerover', (e) => {
     const target = e.target as Element;
     const view = target.closest<HTMLElement>('[data-cursor]');
-    const link = target.closest('a, button, .review');
+    const link = target.closest('a, button');
     cursor.classList.toggle('is-view', !!view);
     cursor.classList.toggle('is-link', !view && !!link);
     if (view) label.textContent = view.dataset.cursor!;
@@ -252,20 +251,57 @@ if (!reduced) {
     });
   });
 
-  // Testimonials: cards fly in, then can be dragged around (desktop)
+  // Testimonials: cards rest in a tilted pile and spread into a tidy grid while the
+  // pointer is over them (tap toggles on touch screens). Desktop layout only.
   mm.add('(min-width: 901px)', () => {
-    const cards = $$('.review');
+    const board = $('.reviews__board');
+    const cards = $$('.review', board);
+    // Per-card nudge and tilt so the pile looks hand-dropped
+    const pile = [
+      { dx: -46, dy: 18, r: -8 },
+      { dx: 4, dy: -26, r: 3 },
+      { dx: 48, dy: 22, r: 8 },
+      { dx: -28, dy: -6, r: -15 },
+      { dx: 34, dy: -14, r: 13 },
+    ];
+    // Offset that pulls a card from its grid slot toward the board centre
+    const pileOf = (i: number) => {
+      const c = cards[i];
+      const p = pile[i % pile.length];
+      return {
+        x: (board.clientWidth / 2 - (c.offsetLeft + c.offsetWidth / 2)) * 0.62 + p.dx,
+        y: (board.clientHeight / 2 - (c.offsetTop + c.offsetHeight / 2)) * 0.62 + p.dy,
+        rotation: p.r,
+      };
+    };
+    let spread = false;
+    const toPile = (duration = 1) =>
+      cards.forEach((c, i) => gsap.to(c, { ...pileOf(i), duration, delay: duration ? i * 0.03 : 0, ease: 'expo.out', overwrite: 'auto' }));
+    const toGrid = () =>
+      gsap.to(cards, { x: 0, y: 0, rotation: 0, duration: 1, stagger: 0.03, ease: 'expo.out', overwrite: 'auto' });
+    const set = (open: boolean) => { if (open === spread) return; spread = open; open ? toGrid() : toPile(); };
+
+    toPile(0);
     gsap.from(cards, {
-      y: 500, rotation: () => gsap.utils.random(-25, 25), autoAlpha: 0, duration: 1.6, stagger: 0.12, ease: 'expo.out',
-      scrollTrigger: { trigger: '.reviews__board', start: 'top 80%' },
+      yPercent: 70, autoAlpha: 0, duration: 1.4, stagger: 0.1, ease: 'expo.out',
+      scrollTrigger: { trigger: board, start: 'top 80%' },
     });
-    let z = 10;
-    const drags = Draggable.create(cards, {
-      bounds: '.reviews',
-      onPress() { gsap.set(this.target, { zIndex: ++z }); gsap.to(this.target, { scale: 1.04, duration: 0.3 }); },
-      onRelease() { gsap.to(this.target, { scale: 1, duration: 0.5, ease: 'elastic.out(1, .5)' }); },
-    });
-    return () => drags.forEach((d) => d.kill());
+
+    const enter = (e: PointerEvent) => e.pointerType === 'mouse' && set(true);
+    const leave = (e: PointerEvent) => e.pointerType === 'mouse' && set(false);
+    const tap = (e: PointerEvent) => e.pointerType !== 'mouse' && set(!spread);
+    const resize = () => { if (!spread) toPile(0); };
+    board.addEventListener('pointerenter', enter);
+    board.addEventListener('pointerleave', leave);
+    board.addEventListener('pointerup', tap);
+    addEventListener('resize', resize);
+    return () => {
+      board.removeEventListener('pointerenter', enter);
+      board.removeEventListener('pointerleave', leave);
+      board.removeEventListener('pointerup', tap);
+      removeEventListener('resize', resize);
+      gsap.set(cards, { clearProps: 'transform' });
+    };
   });
 
   // Count-up numbers

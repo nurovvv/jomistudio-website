@@ -272,14 +272,17 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
   border-radius: clamp(28px, 4vw, 56px) clamp(28px, 4vw, 56px) 0 0;
   padding: clamp(80px, 10vw, 140px) var(--gutter) clamp(60px, 8vw, 120px); text-align: center; overflow: hidden;
 }
-.reviews__board { position: relative; max-width: 1100px; height: 760px; margin: clamp(40px, 5vw, 70px) auto 0; }
-.review {
-  position: absolute; width: 300px; min-height: 300px; padding: 26px; border-radius: 6px; text-align: left;
-  display: flex; flex-direction: column; justify-content: space-between; gap: 24px;
-  box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 20px 50px -20px rgba(31,29,36,.25); cursor: grab; touch-action: none;
-  user-select: none;
+/* The natural layout is a tidy grid; on desktop main.ts tilts the cards into a pile
+   and spreads them back into this grid while the pointer is over the board. */
+.reviews__board {
+  position: relative; max-width: 1000px; margin: clamp(40px, 5vw, 70px) auto 0;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 24px;
 }
-.review:active { cursor: grabbing; }
+.review {
+  position: relative; width: 300px; min-height: 300px; padding: 26px; border-radius: 6px; text-align: left;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 24px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 20px 50px -20px rgba(31,29,36,.25);
+}
 .review--mint { background: var(--mint); }
 .review--lavender { background: var(--lavender); }
 .review--cream { background: var(--cream); }
@@ -288,19 +291,14 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
 .review figcaption { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
 .review figcaption b { display: block; color: var(--ink); font-weight: 600; }
 .review__logo { width: 30px; }
-.review[data-i="0"] { left: 2%; top: 60px; rotate: -7deg; }
-.review[data-i="1"] { left: 36%; top: 0; rotate: 3deg; }
-.review[data-i="2"] { right: 2%; top: 80px; rotate: 8deg; }
-.review[data-i="3"] { left: 16%; top: 400px; rotate: 5deg; }
-.review[data-i="4"] { right: 14%; top: 390px; rotate: -6deg; }
 @media (max-width: 900px) {
   .reviews { text-align: left; }
   .reviews__board {
-    height: auto; display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory;
+    flex-wrap: nowrap; justify-content: flex-start; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory;
     margin-inline: calc(-1 * var(--gutter)); padding: 20px var(--gutter) 40px; scrollbar-width: none;
   }
   .reviews__board::-webkit-scrollbar { display: none; }
-  .review { position: relative; inset: auto !important; rotate: none !important; flex: 0 0 82%; max-width: 320px; scroll-snap-align: center; cursor: auto; touch-action: auto; }
+  .review { flex: 0 0 82%; max-width: 320px; scroll-snap-align: center; }
 }
 
 /* ============ Why ============ */
