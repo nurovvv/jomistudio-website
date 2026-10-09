@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { ui, locales, type Locale } from '../i18n/ui';
+import { ui, locales, localeLabels, type Locale } from '../i18n/ui';
 import { contact } from '../data/projects';
 import Button from '../components/Button.astro';
 import Mark from '../components/Mark.astro';
@@ -52,7 +52,7 @@ const links = [
       </nav>
       <div class="header__right">
         <div class="langs">
-          {locales.map((l) => <a href={`/${l}/`} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{l}</a>)}
+          {locales.map((l) => <a href={`/${l}/`} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{localeLabels[l]}</a>)}
         </div>
         <Button href="#contact" label={t.nav.contact} class="header__cta" />
         <button class="burger" aria-label={t.menu} aria-expanded="false">
@@ -67,7 +67,7 @@ const links = [
       </nav>
       <div class="menu__foot">
         <div class="langs">
-          {locales.map((l) => <a href={`/${l}/`} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{l}</a>)}
+          {locales.map((l) => <a href={`/${l}/`} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{localeLabels[l]}</a>)}
         </div>
         <a href={`mailto:${contact.email}`}>{contact.email}</a>
         <a href={contact.instagram} target="_blank" rel="noopener">Instagram</a>

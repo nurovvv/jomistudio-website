@@ -1,6 +1,10 @@
 export const locales = ['en', 'ru', 'tg'] as const;
 export type Locale = (typeof locales)[number];
 
+// Button labels for the language switcher. `tg` is the ISO code for Tajik and stays in
+// URLs and hreflang; visitors know it by the country code, TJ.
+export const localeLabels: Record<Locale, string> = { en: 'EN', ru: 'RU', tg: 'TJ' };
+
 const en = {
   meta: 'Jomi Studio — digital design & development studio in Dushanbe. Brands, websites and digital products.',
   nav: { services: 'Services', work: 'Work', about: 'About', faq: 'FAQ', contact: 'Contact' },
