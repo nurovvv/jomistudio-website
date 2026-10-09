@@ -172,7 +172,6 @@ addEventListener('keydown', (e) => e.key === 'Escape' && closeMenu());
 if (finePointer) {
   const cursor = $('.cursor');
   const label = $('.cursor__label', cursor);
-  root.classList.add('has-cursor');
   const xTo = gsap.quickTo(cursor, 'x', { duration: 0.2, ease: 'power3' });
   const yTo = gsap.quickTo(cursor, 'y', { duration: 0.2, ease: 'power3' });
   let shown = false;

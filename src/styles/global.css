@@ -104,10 +104,6 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
 .cursor.is-down .cursor__dot { scale: .75; }
 .cursor.is-hidden .cursor__dot { opacity: 0; }
 @media (hover: none), (pointer: coarse) { .cursor { display: none; } }
-/* The dot replaces the system pointer on mouse devices */
-@media (hover: hover) and (pointer: fine) {
-  html.has-cursor, html.has-cursor * { cursor: none !important; }
-}
 
 /* ============ Header ============ */
 .header {
