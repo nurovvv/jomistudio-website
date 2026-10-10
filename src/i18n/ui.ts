@@ -33,13 +33,13 @@ const en = {
   testimonials: { title: 'What our clients say' },
   why: {
     label: 'Why Jomi',
-    text: 'We are a small, focused team, so every project gets senior attention from start to finish. And we speak your language: we work in Tajik, Russian and English.',
+    text: 'We are a small, focused team, so every project gets senior attention from the first call to launch — and we stay with you after it.',
     cards: [
-      { value: 3, suffix: '', label: 'Languages we work in' },
-      { label: 'Strategy, design & development — all in-house' },
-      { value: 100, suffix: '%', label: 'Custom design, no templates' },
-      { label: 'Based in Dushanbe, working worldwide' },
-      { label: 'Fast, direct communication via Telegram' },
+      { value: 1, suffix: ' month', label: 'Free support after launch' },
+      { label: 'Strategy, design & development — one team, start to finish' },
+      { value: 100, suffix: '%', label: 'Every site mobile-first, fast and SEO-ready' },
+      { label: 'Built around your goal — more calls, orders and bookings, not just a pretty page' },
+      { label: 'You talk directly to the designers and developers — no middlemen' },
     ],
   },
   faq: {
@@ -90,13 +90,13 @@ const ru: Dict = {
   testimonials: { title: 'Отзывы клиентов' },
   why: {
     label: 'Почему Jomi',
-    text: 'Мы небольшая сфокусированная команда, поэтому каждый проект от начала до конца ведут опытные специалисты. И мы говорим на вашем языке: работаем на таджикском, русском и английском.',
+    text: 'Мы небольшая сфокусированная команда, поэтому каждый проект от первого звонка до запуска ведут опытные специалисты — и мы остаёмся рядом после запуска.',
     cards: [
-      { value: 3, suffix: '', label: 'Языка, на которых мы работаем' },
-      { label: 'Стратегия, дизайн и разработка — всё внутри команды' },
-      { value: 100, suffix: '%', label: 'Индивидуальный дизайн, без шаблонов' },
-      { label: 'Находимся в Душанбе, работаем по всему миру' },
-      { label: 'Быстрая и прямая связь в Telegram' },
+      { value: 1, suffix: ' месяц', label: 'Бесплатной поддержки после запуска' },
+      { label: 'Стратегия, дизайн и разработка — одна команда от начала до конца' },
+      { value: 100, suffix: '%', label: 'Сайтов с мобильной версией, высокой скоростью и готовых к SEO' },
+      { label: 'Проектируем под вашу цель — больше звонков, заказов и записей, а не просто красивую страницу' },
+      { label: 'Вы общаетесь напрямую с дизайнерами и разработчиками — без посредников' },
     ],
   },
   faq: {
@@ -145,13 +145,13 @@ const tg: Dict = {
   testimonials: { title: 'Мизоҷон дар бораи мо' },
   why: {
     label: 'Чаро Jomi',
-    text: 'Мо дастаи хурд ва мутамарказ ҳастем, бинобар ин ҳар лоиҳаро аз аввал то охир мутахассисони ботаҷриба пеш мебаранд. Ва мо бо забони шумо гап мезанем: тоҷикӣ, русӣ ва англисӣ.',
+    text: 'Мо дастаи хурд ва мутамарказ ҳастем, бинобар ин ҳар лоиҳаро аз занги аввал то оғоз мутахассисони ботаҷриба пеш мебаранд — ва пас аз оғоз низ дар паҳлӯи шумо мемонем.',
     cards: [
-      { value: 3, suffix: '', label: 'Забоне, ки бо он кор мекунем' },
-      { label: 'Стратегия, дизайн ва барномасозӣ — ҳама дар дохили даста' },
-      { value: 100, suffix: '%', label: 'Дизайни фардӣ, бе шаблонҳо' },
-      { label: 'Дар Душанбе ҷойгирем, бо тамоми ҷаҳон кор мекунем' },
-      { label: 'Алоқаи зуд ва мустақим тавассути Telegram' },
+      { value: 1, suffix: ' моҳ', label: 'Дастгирии ройгон пас аз оғоз' },
+      { label: 'Стратегия, дизайн ва барномасозӣ — як даста аз аввал то охир' },
+      { value: 100, suffix: '%', label: 'Сайтҳо бо версияи мобилӣ, суръати баланд ва омода барои SEO' },
+      { label: 'Мувофиқи ҳадафи шумо месозем — зангҳо, фармоишҳо ва сабтҳои бештар, на танҳо саҳифаи зебо' },
+      { label: 'Шумо бевосита бо дизайнерҳо ва барномасозон гап мезанед — бе миёнарав' },
     ],
   },
   faq: {

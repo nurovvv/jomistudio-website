@@ -482,7 +482,8 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
 .stat__icon { width: 28px; }
 .stat__value { display: block; font-size: clamp(56px, 6.2vw, 92px); font-weight: 500; letter-spacing: -.045em; line-height: .95; }
 .stat__label { display: block; margin-top: 14px; font-size: 13px; text-transform: uppercase; letter-spacing: .02em; font-weight: 500; }
-.stat__big { display: block; font-size: clamp(22px, 2vw, 30px); font-weight: 500; letter-spacing: -.025em; line-height: 1.2; max-width: 300px; }
+.stat__big { display: block; font-size: clamp(22px, 2vw, 30px); font-weight: 500; letter-spacing: -.025em; line-height: 1.2; max-width: 340px; }
+.stat:nth-child(n + 4) .stat__big { max-width: 560px; }
 @media (max-width: 860px) {
   .why__top { grid-template-columns: 1fr; gap: 16px; }
   .why__grid { grid-template-columns: 1fr 1fr; }
