@@ -46,12 +46,14 @@ const ease = {
   outBack: (k, s = 1.7) => 1 + (s + 1) * Math.pow(k - 1, 3) + s * Math.pow(k - 1, 2),
 };
 const v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+// Backing-store density: 1 in preview, 2 when rendered with --resolution 4k (deviceScaleFactor).
+const DPR = Math.min(Math.max(window.devicePixelRatio || 1, 1), 2);
 const tmpV = new THREE.Vector3();
 
 // ---------------------------------------------------------------- renderer + post
 const canvas = document.getElementById("reel-canvas");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true, powerPreference: "high-performance" });
-renderer.setPixelRatio(1);
+renderer.setPixelRatio(DPR);
 renderer.setSize(W, H, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -63,7 +65,7 @@ const ENV = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
 const composerTarget = new THREE.WebGLRenderTarget(W, H, { type: THREE.HalfFloatType, samples: 4 });
 const composer = new EffectComposer(renderer, composerTarget);
-composer.setPixelRatio(1);
+composer.setPixelRatio(DPR);
 composer.setSize(W, H);
 const placeholderCam = new THREE.PerspectiveCamera(30, W / H, 0.1, 60);
 const renderPass = new RenderPass(new THREE.Scene(), placeholderCam);
@@ -72,16 +74,16 @@ const bloom = new UnrealBloomPass(new THREE.Vector2(W, H), 0.4, 0.55, 0.85);
 const output = new OutputPass();
 // Film grain + soft vignette, seeded by frame index (deterministic).
 const grain = new ShaderPass({
-  uniforms: { tDiffuse: { value: null }, uSeed: { value: 0 }, uGrain: { value: 0.03 }, uVig: { value: 0.5 } },
+  uniforms: { tDiffuse: { value: null }, uSeed: { value: 0 }, uGrain: { value: 0.016 }, uVig: { value: 0.5 }, uRes: { value: new THREE.Vector2(W * DPR, H * DPR) } },
   vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
   fragmentShader: `
-    uniform sampler2D tDiffuse; uniform float uSeed; uniform float uGrain; uniform float uVig; varying vec2 vUv;
+    uniform sampler2D tDiffuse; uniform float uSeed; uniform float uGrain; uniform float uVig; uniform vec2 uRes; varying vec2 vUv;
     float hash(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33 + uSeed); return fract((p3.x + p3.y) * p3.z); }
     void main(){
       vec4 c = texture2D(tDiffuse, vUv);
       vec2 d = vUv - 0.5; d.x *= 1.3;
       float vig = 1.0 - uVig * dot(d, d);
-      float n = hash(floor(vUv * vec2(1920.0, 1080.0))) - 0.5;
+      float n = hash(floor(vUv * uRes)) - 0.5;
       gl_FragColor = vec4(c.rgb * vig + n * uGrain, c.a);
     }`,
 });
@@ -245,7 +247,7 @@ function softKey(color, intensity, pos, range = 4) {
   Object.assign(l.shadow.camera, { left: -range, right: range, top: range, bottom: -range, near: 0.5, far: 30 });
   return l;
 }
-// A phone body with a canvas screen (screen canvas is 600x1290, rounded corners drawn into it).
+// A phone body with a canvas screen (phoneCanvas(), rounded corners drawn into it).
 function makePhone(bodyMat, screenTex) {
   const g = new THREE.Group();
   const bodyGeo = new THREE.ExtrudeGeometry(roundedRectShape(0.72, 1.53, 0.115), {
@@ -274,9 +276,20 @@ function makePhone(bodyMat, screenTex) {
   g.add(gloss);
   return g;
 }
+// Phone screens are drawn in a 600x1290 logical space on a backing store PHONE_S times larger.
+const PHONE_W = 600;
+const PHONE_H = 1290;
+const PHONE_S = 5 / 3;
+function phoneCanvas() {
+  return makeCanvas(Math.round(PHONE_W * PHONE_S), Math.round(PHONE_H * PHONE_S));
+}
 // Rounded-corner phone screen frame: clip, then draw content, then the camera island.
-function phoneScreen(ctx, w, h, paint) {
-  ctx.clearRect(0, 0, w, h);
+function phoneScreen(ctx, paint) {
+  const w = PHONE_W;
+  const h = PHONE_H;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.setTransform(PHONE_S, 0, 0, PHONE_S, 0, 0);
   ctx.save();
   rr(ctx, 0, 0, w, h, 78);
   ctx.clip();
@@ -373,7 +386,7 @@ function renderAt(time) {
   bloom.threshold = s.threshold ?? 0.85;
   renderer.toneMappingExposure = s.exposure ?? 1;
   grain.uniforms.uSeed.value = Math.floor(t * 30) % 101;
-  grain.uniforms.uGrain.value = s.grain ?? 0.03;
+  grain.uniforms.uGrain.value = s.grain ?? 0.016;
   grain.uniforms.uVig.value = s.vignette ?? 0.5;
   composer.render();
 }
@@ -425,7 +438,7 @@ function buildDark() {
   const WX1 = 287.5;
   const WY0 = 5;
   const WY1 = 102.6;
-  const wpx = 8; // canvas px per logo unit
+  const wpx = 12; // canvas px per logo unit
   const word = makeCanvas(Math.round((WX1 - WX0) * wpx), Math.round((WY1 - WY0) * wpx));
   const wordTex = texFrom(word.cv);
   const wordMesh = new THREE.Mesh(
@@ -492,7 +505,7 @@ function buildDark() {
     glow.material.opacity = glowBase(t);
     const c = ease.inOutSine(seg(lt, 0, 2.4));
     aim(cam, P0.clone().lerp(v3(-0.55, 0.32, 4.7), c), LOOK0, -0.06 * c);
-    return { scene, camera: cam, focus: cam.position.distanceTo(LOOK0), aperture: 0.0026 * ease.inOutSine(seg(lt, 0.2, 1.4)), maxblur: 0.014, bloom: 0.3, threshold: 0.95, exposure: 0.95 };
+    return { scene, camera: cam, focus: cam.position.distanceTo(LOOK0), aperture: 0.002 * ease.inOutSine(seg(lt, 0.2, 1.4)), maxblur: 0.012, bloom: 0.3, threshold: 0.95, exposure: 0.95 };
   }
 
   function shot6(lt, t) {
@@ -585,7 +598,7 @@ function buildWebsites(deskImg, deskTop, mobImg, mobTop, mobBot) {
   const bezel = new THREE.Mesh(new THREE.PlaneGeometry(2.95, 1.95), physical(0x050506, { roughness: 0.15, clearcoat: 1 }));
   bezel.position.set(0, 1.0, 0.0006);
   lid.add(bezel);
-  const desk = makeCanvas(1280, 800);
+  const desk = makeCanvas(2560, 1600);
   const deskTex = texFrom(desk.cv);
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(2.84, 1.775), new THREE.MeshBasicMaterial({ map: deskTex, toneMapped: false }));
   screen.position.set(0, 1.035, 0.0012);
@@ -604,27 +617,27 @@ function buildWebsites(deskImg, deskTop, mobImg, mobTop, mobBot) {
 
   function paintDesk(scrollCss) {
     const { ctx } = desk;
-    const k = 0.6; // source px per css px
-    ctx.drawImage(deskImg, 0, scrollCss * k, 1440 * k, 900 * k, 0, 0, 1280, 800);
-    ctx.drawImage(deskTop, 0, 0, deskTop.width, deskTop.height, 0, 0, 1280, (109 * 1280) / 1440);
+    const k = 1.25; // source px per css px
+    ctx.drawImage(deskImg, 0, scrollCss * k, 1440 * k, 900 * k, 0, 0, 2560, 1600);
+    ctx.drawImage(deskTop, 0, 0, deskTop.width, deskTop.height, 0, 0, 2560, (109 * 2560) / 1440);
     ctx.fillStyle = "#050506";
-    rr(ctx, 640 - 72, -14, 144, 40, 12);
+    rr(ctx, 1280 - 144, -28, 288, 80, 24);
     ctx.fill();
     deskTex.needsUpdate = true;
   }
 
   // ---- phone (real mobile capture)
-  const mob = makeCanvas(600, 1290);
+  const mob = phoneCanvas();
   const mobTex = texFrom(mob.cv);
   const phone = makePhone(physical(0x2a2b30, { metalness: 0.85, roughness: 0.32, clearcoat: 0.6 }), mobTex);
   phone.position.set(0.72, -0.5, 1.05);
   phone.rotation.set(-0.06, -0.42, 0.07);
   scene.add(phone);
   function paintMob(scrollCss) {
-    phoneScreen(mob.ctx, 600, 1290, (ctx, w, h) => {
+    phoneScreen(mob.ctx, (ctx, w, h) => {
       ctx.fillStyle = "#0e0e0f";
       ctx.fillRect(0, 0, w, h);
-      const k = 1.5; // source px per css px
+      const k = 2.5; // source px per css px
       const top = 92;
       const viewCss = (h - top) / (600 / 390);
       ctx.drawImage(mobImg, 0, scrollCss * k, 390 * k, viewCss * k, 0, top, 600, h - top);
@@ -755,7 +768,7 @@ function buildBranding() {
     card.rotation.y += Math.PI * flip;
     const c = ease.inOutSine(seg(lt, 0, 2.4));
     aim(cam, v3(0.35, 0.25, 6.5).lerp(v3(-0.2, -0.05, 5.5), c), LOOK, 0.03 * c);
-    return { scene, camera: cam, focus: cam.position.distanceTo(items[2].m.position), aperture: 0.0022, maxblur: 0.012, bloom: 0.12, threshold: 0.95, exposure: 1.02, grain: 0.025, vignette: 0.35 };
+    return { scene, camera: cam, focus: cam.position.distanceTo(items[2].m.position), aperture: 0.0022, maxblur: 0.012, bloom: 0.12, threshold: 0.95, exposure: 1.02, grain: 0.014, vignette: 0.35 };
   };
 }
 
@@ -789,10 +802,10 @@ function buildApps() {
   });
 
   // Concept app screen: cream UI, ink type, green accents. Progress ring counts up.
-  const app = makeCanvas(600, 1290);
+  const app = phoneCanvas();
   const appTex = texFrom(app.cv);
   function paintApp(progress) {
-    phoneScreen(app.ctx, 600, 1290, (ctx, w, h) => {
+    phoneScreen(app.ctx, (ctx, w, h) => {
       ctx.fillStyle = HEX.cream;
       ctx.fillRect(0, 0, w, h);
       statusBar(ctx, w, HEX.ink);
@@ -881,7 +894,9 @@ function buildApps() {
 
   // Floating UI cards (transparent canvases with soft shadows drawn in).
   function cardCanvas(w, h, paint) {
-    const { cv, ctx } = makeCanvas(w, h);
+    const S = 1.6; // backing-store scale
+    const { cv, ctx } = makeCanvas(Math.round(w * S), Math.round(h * S));
+    ctx.scale(S, S);
     ctx.shadowColor = "rgba(20,40,30,0.25)";
     ctx.shadowBlur = 30;
     ctx.shadowOffsetY = 12;
@@ -966,7 +981,7 @@ function buildApps() {
     });
     const c = ease.inOutSine(seg(lt, 0, 2.4));
     aim(cam, v3(0.3, 0.28, 5.7).lerp(v3(-0.1, 0.06, 5.0), c), LOOK);
-    return { scene, camera: cam, focus: cam.position.length(), aperture: 0.0016, maxblur: 0.01, bloom: 0.12, threshold: 0.96, exposure: 1.0, grain: 0.025, vignette: 0.4 };
+    return { scene, camera: cam, focus: cam.position.length(), aperture: 0.0016, maxblur: 0.01, bloom: 0.12, threshold: 0.96, exposure: 1.0, grain: 0.014, vignette: 0.4 };
   };
 }
 
@@ -1031,6 +1046,6 @@ function buildStudio() {
     const pos = v3(2.2, 0.78, 5.7).lerp(v3(0.55, 0.66, 5.0), c).lerp(v3(0.7, 1.05, 3.3), tilt);
     const look = v3(0.35, 0.38, -0.3).lerp(v3(0.15, 0.4, -0.3), c).lerp(v3(0.6, 0.25, 0.3), tilt);
     aim(cam, pos, look);
-    return { scene, camera: cam, focus: cam.position.distanceTo(glass.position), aperture: 0.0026, maxblur: 0.012, bloom: 0.1, threshold: 0.97, exposure: 0.98, grain: 0.022, vignette: 0.32 };
+    return { scene, camera: cam, focus: cam.position.distanceTo(glass.position), aperture: 0.0026, maxblur: 0.012, bloom: 0.1, threshold: 0.97, exposure: 0.98, grain: 0.012, vignette: 0.32 };
   };
 }

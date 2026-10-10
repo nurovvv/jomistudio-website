@@ -32,6 +32,8 @@ const icons = [
       <div class="hero__media" data-cursor={t.showreel}>
         {showreel.mp4 ? (
           <video autoplay muted loop playsinline preload="auto" poster={showreel.poster} disablepictureinpicture aria-hidden="true">
+            <source media="(max-width: 900px)" src={showreel.small.webm} type="video/webm" />
+            <source media="(max-width: 900px)" src={showreel.small.mp4} type="video/mp4" />
             <source src={showreel.webm} type="video/webm" />
             <source src={showreel.mp4} type="video/mp4" />
           </video>

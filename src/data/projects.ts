@@ -56,10 +56,13 @@ export const projects: Project[] = [
   },
 ];
 
-// Hero showreel (source project: videos/jomi-showreel). Empty `mp4` shows the animated brand placeholder.
+// Hero showreel (source project: videos/jomi-showreel, rendered at 4K and downscaled).
+// Phones get the lighter 1080p files, larger screens the 1440p ones. Empty `mp4` shows the
+// animated brand placeholder.
 export const showreel = {
-  webm: '/showreel/jomi-showreel.webm',
-  mp4: '/showreel/jomi-showreel.mp4',
+  small: { webm: '/showreel/jomi-showreel-1080.webm', mp4: '/showreel/jomi-showreel-1080.mp4' },
+  webm: '/showreel/jomi-showreel-1440.webm',
+  mp4: '/showreel/jomi-showreel-1440.mp4',
   poster: '/showreel/jomi-showreel-poster.jpg',
 };
 
