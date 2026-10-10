@@ -42,35 +42,45 @@ const links = [
     <div class="cursor is-hidden" aria-hidden="true"><span class="cursor__dot"><span class="cursor__label"></span><svg class="cursor__arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></span></div>
 
     <header class="header">
-      <a href={`/${lang}/`} class="header__logo" aria-label="Jomi Studio">
-        <img src="/brand/jomi_logo_light.svg" alt="Jomi Studio" width="152" height="60" />
-      </a>
-      <nav class="header__nav">
-        {links.map(([href, label]) => (
-          <a href={href} class="roll" data-text={label}><span>{label}</span></a>
-        ))}
-      </nav>
-      <div class="header__right">
-        <div class="langs">
-          {locales.map((l) => <a href={`/${l}/`} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{localeLabels[l]}</a>)}
+      <div class="header__bar">
+        <a href={`/${lang}/`} class="header__logo" aria-label="Jomi Studio">
+          <img class="header__logo-ink" src="/brand/jomi_logo_light.svg" alt="Jomi Studio" width="152" height="60" />
+          <img class="header__logo-paper" src="/brand/jomi_logo_dark.svg" alt="" width="152" height="60" />
+        </a>
+        <nav class="header__nav">
+          {links.map(([href, label]) => (
+            <a href={href} class="header__link" data-section={href.slice(1)}>
+              <span class="roll roll--grow" data-text={label}><span>{label}</span></span>
+            </a>
+          ))}
+        </nav>
+        <div class="header__right">
+          <div class="langs">
+            {locales.map((l) => <a href={`/${l}/`} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{localeLabels[l]}</a>)}
+          </div>
+          <Button href="#contact" label={t.nav.contact} class="header__cta" />
+          <button class="burger" aria-label={t.menu} aria-expanded="false" aria-controls="menu">
+            <span></span><span></span>
+          </button>
         </div>
-        <Button href="#contact" label={t.nav.contact} class="header__cta" />
-        <button class="burger" aria-label={t.menu} aria-expanded="false">
-          <span></span><span></span>
-        </button>
       </div>
     </header>
 
-    <div class="menu" aria-hidden="true">
-      <nav class="menu__nav">
-        {[...links, ['#contact', t.nav.contact]].map(([href, label]) => <a href={href}><span>{label}</span></a>)}
-      </nav>
-      <div class="menu__foot">
-        <div class="langs">
-          {locales.map((l) => <a href={`/${l}/`} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{localeLabels[l]}</a>)}
+    <!-- Phone menu: a panel that drops down under the header -->
+    <div class="menu" id="menu" aria-hidden="true">
+      <div class="menu__panel">
+        <span class="menu__label">{t.menu}</span>
+        <nav class="menu__nav">
+          {links.map(([href, label]) => <a href={href}><span>{label}</span></a>)}
+        </nav>
+        <Button href="#contact" label={t.nav.contact} class="menu__cta" />
+        <div class="menu__foot">
+          <div class="langs">
+            {locales.map((l) => <a href={`/${l}/`} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{localeLabels[l]}</a>)}
+          </div>
+          <a href={`mailto:${contact.email}`}>{contact.email}</a>
+          <a href={contact.instagram} target="_blank" rel="noopener">Instagram</a>
         </div>
-        <a href={`mailto:${contact.email}`}>{contact.email}</a>
-        <a href={contact.instagram} target="_blank" rel="noopener">Instagram</a>
       </div>
     </div>
 

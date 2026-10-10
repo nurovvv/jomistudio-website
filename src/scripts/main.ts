@@ -114,7 +114,7 @@ function heroIntro() {
   tl.from(words, { yPercent: 110, duration: 1.3, stagger: 0.045 })
     .from('[data-hero-fade]', { y: 24, autoAlpha: 0, duration: 1.2 }, 0.35)
     .from('.hero__media-wrap', { y: 120, autoAlpha: 0, duration: 1.6 }, 0.45)
-    .from('.header', { yPercent: -100, duration: 1.2 }, 0.3);
+    .from('.header__bar', { autoAlpha: 0, y: -16, duration: 1.2 }, 0.3);
 }
 // Showreel block grows as it scrolls toward the top
 gsap.fromTo('.hero__media', { scale: 0.92 }, {
@@ -133,38 +133,60 @@ if ($('.reel', document) && !reduced) {
   ScrollTrigger.create({ trigger: '.hero__media', onToggle: (s) => (s.isActive ? reel.play() : reel.pause()) });
 }
 
-/* ---------------- Header: hide on scroll down, show on scroll up ---------------- */
+/* ---------------- Header ---------------- */
+// Slides away on scroll down, comes back on scroll up
 const header = $('.header');
 let headerHidden = false;
 ScrollTrigger.create({
   start: 0, end: 'max',
   onUpdate: (self) => {
-    const y = self.scroll();
-    header.classList.toggle('is-scrolled', y > 20);
-    const hide = self.direction === 1 && y > 300 && !root.classList.contains('is-menu-open');
+    const hide = self.direction === 1 && self.scroll() > 300 && !root.classList.contains('is-menu-open');
     if (hide === headerHidden) return;
     headerHidden = hide;
     gsap.to(header, { yPercent: hide ? -100 : 0, duration: 0.7, ease: 'expo.out', overwrite: 'auto' });
   },
 });
 
-/* ---------------- Mobile menu ---------------- */
+// Turns white while it sits over a dark section
+const darkZones = $$('.hero__media, .work, .faq, .footer').map((el) =>
+  ScrollTrigger.create({
+    trigger: el, start: 'top 36px', end: 'bottom 36px',
+    onToggle: () => header.classList.toggle('is-dark', darkZones.some((z) => z.isActive)),
+  }),
+);
+
+// Underlines the link of the section in view
+$$<HTMLAnchorElement>('.header__link').forEach((link) => {
+  const section = document.getElementById(link.dataset.section!);
+  if (!section) return;
+  ScrollTrigger.create({
+    trigger: section, start: 'top 50%', end: 'bottom 50%',
+    onToggle: (st) => link.classList.toggle('is-active', st.isActive),
+  });
+});
+
+/* ---------------- Phone menu: panel drops down under the header ---------------- */
 const burger = $<HTMLButtonElement>('.burger');
+const menu = $('.menu');
 function closeMenu() {
   if (!root.classList.contains('is-menu-open')) return;
   root.classList.remove('is-menu-open');
   burger.setAttribute('aria-expanded', 'false');
+  menu.setAttribute('aria-hidden', 'true');
   lenis?.start();
 }
 burger.addEventListener('click', () => {
   const open = root.classList.toggle('is-menu-open');
   burger.setAttribute('aria-expanded', String(open));
-  if (open) {
-    lenis?.stop();
-    gsap.fromTo('.menu__nav a span', { yPercent: 110 }, { yPercent: 0, stagger: 0.06, duration: 1, delay: 0.2, ease: 'expo.out' });
-    gsap.fromTo('.menu__foot', { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.8, delay: 0.45, ease: 'expo.out' });
-  } else lenis?.start();
+  menu.setAttribute('aria-hidden', String(!open));
+  if (!open) { lenis?.start(); return; }
+  lenis?.stop();
+  if (reduced) return;
+  gsap.fromTo('.menu__nav a span', { yPercent: 110 }, { yPercent: 0, stagger: 0.06, duration: 1, delay: 0.15, ease: 'expo.out' });
+  gsap.fromTo('.menu__label, .menu__cta, .menu__foot', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, stagger: 0.06, duration: 0.8, delay: 0.3, ease: 'expo.out' });
 });
+// Tapping the dimmed page behind the panel closes it
+menu.addEventListener('click', (e) => { if (e.target === menu) closeMenu(); });
 addEventListener('keydown', (e) => e.key === 'Escape' && closeMenu());
 
 /* ---------------- Cursor dot + magnetic elements ---------------- */
