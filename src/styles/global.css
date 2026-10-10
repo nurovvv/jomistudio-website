@@ -89,30 +89,53 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
 .btn .btn__fill { transition: transform .6s var(--ease); }
 
 /* ============ Cursor dot ============ */
-/* A dot that follows the pointer. It inverts what's under it, grows over links,
-   and turns into a green labelled bubble over [data-cursor] elements. */
+/* A dot that follows the pointer. The white shape (difference blend) inverts what's under
+   it; it grows over links, becomes a lens with an arrow over project cards and with a play
+   icon over the showreel, and stretches along the direction of travel (main.ts). Icons sit
+   on a separate layer so they stay upright while the shape stretches. */
 .cursor { position: fixed; left: 0; top: 0; z-index: 1500; pointer-events: none; mix-blend-mode: difference; }
 .cursor__dot {
-  position: absolute; left: 0; top: 0; width: 12px; height: 12px; border-radius: 50%;
-  translate: -50% -50%; background: #fff; display: grid; place-items: center; overflow: hidden;
-  transition: width .5s var(--ease-out), height .5s var(--ease-out), background .3s, opacity .3s, scale .3s var(--ease-out);
+  position: absolute; left: 0; top: 0; width: 12px; height: 12px;
+  translate: -50% -50%; display: grid; place-items: center;
+  transition: width .5s var(--ease-out), height .5s var(--ease-out), opacity .3s, scale .3s var(--ease-out);
 }
-.cursor__label { font-size: 14px; font-weight: 500; color: var(--ink); white-space: nowrap; opacity: 0; transition: opacity .25s; }
+.cursor__shape { position: absolute; inset: 0; border-radius: 50%; background: #fff; transition: background .3s; }
+.cursor__label { position: relative; font-size: 14px; font-weight: 500; color: var(--ink); white-space: nowrap; opacity: 0; transition: opacity .25s; }
 .cursor.is-link .cursor__dot { width: 52px; height: 52px; }
 .cursor.is-view { mix-blend-mode: normal; }
-.cursor.is-view .cursor__dot { width: 92px; height: 92px; background: var(--green); }
+.cursor.is-view .cursor__dot { width: 92px; height: 92px; }
+.cursor.is-view .cursor__shape { background: var(--green); }
 .cursor.is-view .cursor__label { opacity: 1; transition-delay: .1s; }
-/* Over project cards the dot grows into a lens: the white circle (difference blend)
-   inverts whatever is under it, and the black arrow leaves the original colours. */
-.cursor__arrow {
-  position: absolute; inset: 0; margin: auto; width: 30px; height: 30px; color: #000;
-  opacity: 0; transform: scale(.4) rotate(-45deg); transition: opacity .25s, transform .5s var(--ease-out);
+/* Black icons on the white difference shape keep the original colours under them */
+.cursor__arrow, .cursor__play {
+  position: absolute; inset: 0; margin: auto; color: #000;
+  opacity: 0; transition: opacity .25s, transform .5s var(--ease-out);
 }
+.cursor__arrow { width: 30px; height: 30px; transform: scale(.4) rotate(-45deg); }
+.cursor__play { width: 24px; height: 24px; transform: scale(.4); }
 .cursor.is-arrow .cursor__dot { width: 104px; height: 104px; }
 .cursor.is-arrow .cursor__arrow { opacity: 1; transform: none; transition-delay: .08s; }
+.cursor.is-play .cursor__dot { width: 88px; height: 88px; }
+.cursor.is-play .cursor__play { opacity: 1; transform: none; transition-delay: .08s; }
 .cursor.is-down .cursor__dot { scale: .75; }
 .cursor.is-hidden .cursor__dot { opacity: 0; }
 @media (hover: none), (pointer: coarse) { .cursor { display: none; } }
+
+/* ============ Showreel player (opens from the hero video) ============ */
+.reel-modal {
+  position: fixed; inset: 0; z-index: 1400; display: grid; place-items: center; padding: clamp(16px, 4vw, 64px);
+  background: rgba(14, 13, 17, .94); visibility: hidden; opacity: 0;
+}
+.reel-modal__video { width: 100%; max-width: 1600px; max-height: 100%; aspect-ratio: 16 / 9; border-radius: var(--radius); background: #000; object-fit: cover; }
+.reel-modal__close {
+  position: absolute; top: clamp(14px, 2vw, 28px); right: clamp(14px, 2vw, 28px);
+  width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,.1); color: #fff;
+  display: grid; place-items: center; transition: background .3s, color .3s;
+}
+.reel-modal__close:hover { background: #fff; color: var(--ink); }
+.reel-modal__close svg { width: 18px; height: 18px; }
+.hero__media { cursor: pointer; }
+.hero__media:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
 
 /* ============ Header ============ */
 /* Transparent bar aligned with the page content. It slides away on scroll down and

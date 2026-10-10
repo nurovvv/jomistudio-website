@@ -222,12 +222,31 @@ if (finePointer) {
   document.addEventListener('pointerover', (e) => {
     const target = e.target as Element;
     const view = target.closest<HTMLElement>('[data-cursor]');
-    const arrow = view?.dataset.cursor === 'arrow';
+    const mode = view?.dataset.cursor;
+    const icon = mode === 'arrow' || mode === 'play';
     const link = target.closest('a, button');
-    cursor.classList.toggle('is-arrow', arrow);
-    cursor.classList.toggle('is-view', !!view && !arrow);
+    cursor.classList.toggle('is-arrow', mode === 'arrow');
+    cursor.classList.toggle('is-play', mode === 'play');
+    cursor.classList.toggle('is-view', !!view && !icon);
     cursor.classList.toggle('is-link', !view && !!link);
-    if (view && !arrow) label.textContent = view.dataset.cursor!;
+    if (view && !icon) label.textContent = mode!;
+  });
+
+  // Stretch the shape along the direction of travel; it settles round when the pointer rests
+  const shape = $('.cursor__shape', cursor);
+  let lastX = 0;
+  let lastY = 0;
+  let vx = 0;
+  let vy = 0;
+  gsap.ticker.add(() => {
+    const x = gsap.getProperty(cursor, 'x') as number;
+    const y = gsap.getProperty(cursor, 'y') as number;
+    vx += (x - lastX - vx) * 0.35;
+    vy += (y - lastY - vy) * 0.35;
+    lastX = x;
+    lastY = y;
+    const stretch = Math.min(Math.hypot(vx, vy) / 60, 1) * 0.32;
+    gsap.set(shape, { rotation: (Math.atan2(vy, vx) * 180) / Math.PI, scaleX: 1 + stretch, scaleY: 1 - stretch * 0.55 });
   });
 
   $$('.magnetic').forEach((el) => {
@@ -238,6 +257,66 @@ if (finePointer) {
     });
     el.addEventListener('pointerleave', () => gsap.to(el, { x: 0, y: 0, duration: 1, ease: 'elastic.out(1, .3)' }));
   });
+}
+
+/* ---------------- Showreel player ---------------- */
+// Clicking the hero video opens it large; close with the button, Esc, or a click outside.
+const reelModal = document.querySelector<HTMLElement>('.reel-modal');
+const heroMedia = document.querySelector<HTMLElement>('.hero__media');
+if (reelModal && heroMedia) {
+  const modalVideo = $<HTMLVideoElement>('.reel-modal__video', reelModal);
+  const heroVideo = heroMedia.querySelector('video');
+  let open = false;
+  const closeBtn = $<HTMLButtonElement>('.reel-modal__close', reelModal);
+  const openReel = () => {
+    if (open) return;
+    open = true;
+    lenis?.stop();
+    reelModal.setAttribute('aria-hidden', 'false');
+    if (heroVideo) {
+      modalVideo.currentTime = heroVideo.currentTime;
+      heroVideo.pause();
+    }
+    // Started from the click, so unmuted playback is allowed (the reel has no sound track anyway);
+    // muted autoplay would be paused by the browser while the player is still fading in.
+    modalVideo.play().catch(() => {
+      modalVideo.muted = true;
+      modalVideo.play().catch(() => {});
+    });
+    gsap.set(reelModal, { visibility: 'visible' });
+    gsap.fromTo(reelModal, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: 'power2.out', overwrite: true });
+    gsap.fromTo(modalVideo, { scale: 0.92, y: 30 }, { scale: 1, y: 0, duration: 0.9, ease: 'expo.out' });
+    closeBtn.focus();
+  };
+  const closeReel = () => {
+    if (!open) return;
+    open = false;
+    reelModal.setAttribute('aria-hidden', 'true');
+    gsap.to(reelModal, {
+      opacity: 0, duration: 0.4, ease: 'power2.in', overwrite: true,
+      onComplete: () => {
+        gsap.set(reelModal, { visibility: 'hidden' });
+        modalVideo.pause();
+      },
+    });
+    if (heroVideo && !reduced) heroVideo.play().catch(() => {});
+    lenis?.start();
+    heroMedia.focus();
+  };
+  // Keep the reel running while the player is open, even if the browser pauses it
+  modalVideo.addEventListener('pause', () => {
+    if (open) modalVideo.play().catch(() => {});
+  });
+  heroMedia.addEventListener('click', openReel);
+  heroMedia.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openReel();
+    }
+  });
+  $('.reel-modal__close', reelModal).addEventListener('click', closeReel);
+  reelModal.addEventListener('click', (e) => { if (e.target === reelModal) closeReel(); });
+  addEventListener('keydown', (e) => e.key === 'Escape' && closeReel());
 }
 
 /* ---------------- Scroll animations ---------------- */

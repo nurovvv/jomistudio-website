@@ -29,7 +29,7 @@ const icons = [
     </h1>
     <p class="hero__sub" data-hero-fade>{t.hero.sub}</p>
     <div class="hero__media-wrap">
-      <div class="hero__media" data-cursor={t.showreel}>
+      <div class="hero__media" data-cursor="play" role="button" tabindex="0" aria-label={t.showreel} aria-haspopup="dialog">
         {showreel.mp4 ? (
           <video autoplay muted loop playsinline preload="auto" poster={showreel.poster} disablepictureinpicture aria-hidden="true">
             <source media="(max-width: 900px)" src={showreel.small.webm} type="video/webm" />
@@ -50,6 +50,18 @@ const icons = [
       </div>
     </div>
   </section>
+
+  {showreel.mp4 && (
+    <div class="reel-modal" role="dialog" aria-modal="true" aria-label={t.showreel} aria-hidden="true">
+      <button class="reel-modal__close" aria-label={t.close}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+      </button>
+      <video class="reel-modal__video" loop playsinline preload="none" poster={showreel.poster}>
+        <source src={showreel.webm} type="video/webm" />
+        <source src={showreel.mp4} type="video/mp4" />
+      </video>
+    </div>
+  )}
 
   <!-- INTRO -->
   <section class="intro wrap" id="about">
