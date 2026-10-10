@@ -66,28 +66,17 @@ export const showreel = {
   poster: '/showreel/jomi-showreel-poster.jpg',
 };
 
-// Client logos (SVG/PNG in public/clients/). Empty `logo` shows a placeholder;
-// `url` makes the logo a link to the client's site (opens in a new tab).
+// Client logos (SVG/PNG in public/clients/). `url` makes the logo a link to the client's
+// site (opens in a new tab). Entries without `logo` render as a placeholder.
 export const clients: { name: string; logo?: string; url?: string }[] = [
   { name: 'KIMCHI', logo: '/clients/kimchi.svg', url: 'https://kimchi-menu-dushanbe.netlify.app/' },
-  ...Array.from({ length: 11 }, (_, i) => ({ name: `Client ${String(i + 2).padStart(2, '0')}` })),
 ];
 
 export type Testimonial = { name: string; role: string; text: T; color: 'mint' | 'lavender' | 'cream' };
 
-const reviewSoon: T = {
-  en: 'A client review will appear here. Send us your clients’ feedback and we will add it to this section.',
-  ru: 'Здесь появится отзыв клиента. Пришлите нам отзывы клиентов, и мы добавим их в этот раздел.',
-  tg: 'Дар ин ҷо фикри мизоҷ хоҳад буд. Фикрҳои мизоҷонро фиристед ва мо онҳоро илова мекунем.',
-};
-
-export const testimonials: Testimonial[] = [
-  { name: 'Client name', role: 'Company', text: reviewSoon, color: 'mint' },
-  { name: 'Client name', role: 'Company', text: reviewSoon, color: 'lavender' },
-  { name: 'Client name', role: 'Company', text: reviewSoon, color: 'cream' },
-  { name: 'Client name', role: 'Company', text: reviewSoon, color: 'lavender' },
-  { name: 'Client name', role: 'Company', text: reviewSoon, color: 'mint' },
-];
+// Real client reviews only. The "What our clients say" section is hidden while this is empty.
+// Example: { name: 'Name Surname', role: 'Owner, KIMCHI', text: { en: '…', ru: '…', tg: '…' }, color: 'mint' }
+export const testimonials: Testimonial[] = [];
 
 export const contact = {
   email: 'hello@jomistudio.tj',

@@ -96,7 +96,7 @@ const icons = [
   <!-- CLIENTS -->
   <section class="clients wrap">
     <h2 class="clients__title" data-fade>{t.clients}</h2>
-    <div class="clients__grid">
+    <div class:list={['clients__grid', { 'clients__grid--few': clients.length < 4 }]}>
       {clients.map((c) => (
         <div class="clients__item" data-stagger>
           {c.logo
@@ -144,19 +144,21 @@ const icons = [
     </div>
   </section>
 
-  <!-- TESTIMONIALS: scattered, draggable cards -->
-  <section class="reviews">
-    <h2 class="h2 reviews__title" data-split>{t.testimonials.title}</h2>
-    <div class="reviews__board">
-      {testimonials.map((r, i) => (
-        <figure class:list={['review', `review--${r.color}`]} data-i={i}>
-          <svg class="review__q" viewBox="0 0 32 24" aria-hidden="true"><path d="M0 24V14C0 6 4 1 12 0l1 4c-4 1-6 4-6 8h6v12zm19 0V14c0-8 4-13 12-14l1 4c-4 1-6 4-6 8h6v12z" fill="currentColor"/></svg>
-          <blockquote>{r.text[lang]}</blockquote>
-          <figcaption><Mark class="review__logo" /><span><b>{r.name}</b>{r.role}</span></figcaption>
-        </figure>
-      ))}
-    </div>
-  </section>
+  <!-- TESTIMONIALS: a tilted pile that spreads into a grid on hover; hidden while there are none -->
+  {testimonials.length > 0 && (
+    <section class="reviews">
+      <h2 class="h2 reviews__title" data-split>{t.testimonials.title}</h2>
+      <div class="reviews__board">
+        {testimonials.map((r, i) => (
+          <figure class:list={['review', `review--${r.color}`]} data-i={i}>
+            <svg class="review__q" viewBox="0 0 32 24" aria-hidden="true"><path d="M0 24V14C0 6 4 1 12 0l1 4c-4 1-6 4-6 8h6v12zm19 0V14c0-8 4-13 12-14l1 4c-4 1-6 4-6 8h6v12z" fill="currentColor"/></svg>
+            <blockquote>{r.text[lang]}</blockquote>
+            <figcaption><Mark class="review__logo" /><span><b>{r.name}</b>{r.role}</span></figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  )}
 
   <!-- WHY -->
   <section class="why wrap">

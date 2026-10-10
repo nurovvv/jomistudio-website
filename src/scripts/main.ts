@@ -370,7 +370,8 @@ if (!reduced) {
   // Testimonials: cards rest in a tilted pile and spread into a tidy grid while the
   // pointer is over them (tap toggles on touch screens). Desktop layout only.
   mm.add('(min-width: 901px)', () => {
-    const board = $('.reviews__board');
+    const board = document.querySelector<HTMLElement>('.reviews__board');
+    if (!board) return;
     const cards = $$('.review', board);
     // Per-card nudge and tilt so the pile looks hand-dropped
     const pile = [
