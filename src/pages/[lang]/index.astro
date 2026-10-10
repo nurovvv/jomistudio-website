@@ -30,8 +30,11 @@ const icons = [
     <p class="hero__sub" data-hero-fade>{t.hero.sub}</p>
     <div class="hero__media-wrap">
       <div class="hero__media" data-cursor={t.showreel}>
-        {showreel.video ? (
-          <video src={showreel.video} autoplay muted loop playsinline></video>
+        {showreel.mp4 ? (
+          <video autoplay muted loop playsinline preload="auto" poster={showreel.poster} disablepictureinpicture aria-hidden="true">
+            <source src={showreel.webm} type="video/webm" />
+            <source src={showreel.mp4} type="video/mp4" />
+          </video>
         ) : (
           <div class="reel">
             <div class="reel__glow reel__glow--1"></div>

@@ -56,8 +56,12 @@ export const projects: Project[] = [
   },
 ];
 
-// Showreel shown in the hero. Leave empty to show the animated brand placeholder.
-export const showreel = { video: '' };
+// Hero showreel (source project: videos/jomi-showreel). Empty `mp4` shows the animated brand placeholder.
+export const showreel = {
+  webm: '/showreel/jomi-showreel.webm',
+  mp4: '/showreel/jomi-showreel.mp4',
+  poster: '/showreel/jomi-showreel-poster.jpg',
+};
 
 // Client logos (SVG/PNG in public/clients/). Empty `logo` shows a placeholder;
 // `url` makes the logo a link to the client's site (opens in a new tab).

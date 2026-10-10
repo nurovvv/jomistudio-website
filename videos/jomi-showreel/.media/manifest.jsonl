@@ -1,0 +1,9 @@
+{"id":"icon_001","type":"icon","path":"assets/brand/jomi_logo_dark.svg","source":"existing","description":"jomi logo dark","provenance":{"provider":"local","adopted":true}}
+{"id":"icon_002","type":"icon","path":"assets/brand/jomi_logo_light.svg","source":"existing","description":"jomi logo light","provenance":{"provider":"local","adopted":true}}
+{"id":"icon_003","type":"icon","path":"assets/brand/jomi_mark_dark.svg","source":"existing","description":"jomi mark dark","provenance":{"provider":"local","adopted":true}}
+{"id":"icon_004","type":"icon","path":"assets/brand/jomi_mark_light.svg","source":"existing","description":"jomi mark light","provenance":{"provider":"local","adopted":true}}
+{"id":"image_001","type":"image","path":"assets/kimchi/desktop-top.png","source":"existing","description":"desktop top","width":864,"height":65,"provenance":{"provider":"local","adopted":true}}
+{"id":"image_002","type":"image","path":"assets/kimchi/desktop.webp","source":"existing","description":"desktop","width":864,"height":2520,"provenance":{"provider":"local","adopted":true}}
+{"id":"image_003","type":"image","path":"assets/kimchi/mobile-bottom.png","source":"existing","description":"mobile bottom","width":585,"height":86,"provenance":{"provider":"local","adopted":true}}
+{"id":"image_004","type":"image","path":"assets/kimchi/mobile-top.png","source":"existing","description":"mobile top","width":585,"height":164,"provenance":{"provider":"local","adopted":true}}
+{"id":"image_005","type":"image","path":"assets/kimchi/mobile.webp","source":"existing","description":"mobile","width":585,"height":7800,"provenance":{"provider":"local","adopted":true}}

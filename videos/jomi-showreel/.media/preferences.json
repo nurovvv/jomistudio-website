@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "preferences": {
+    "flow": {
+      "value": "automation",
+      "confirmed_in": [
+        "jomi-showreel"
+      ],
+      "updated_at": "2026-10-10T00:15:15.673Z"
+    },
+    "storyboard": {
+      "value": "yes",
+      "confirmed_in": [
+        "jomi-showreel"
+      ],
+      "updated_at": "2026-10-10T00:15:15.696Z"
+    }
+  },
+  "sightings": {}
+}

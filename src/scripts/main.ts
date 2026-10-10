@@ -122,6 +122,17 @@ gsap.fromTo('.hero__media', { scale: 0.92 }, {
   scrollTrigger: { trigger: '.hero__media', start: 'top 90%', end: 'top 10%', scrub: true },
 });
 
+// Visitors who prefer reduced motion see the showreel's poster frame instead of playback
+$$<HTMLVideoElement>('.hero__media video').forEach((v) => {
+  if (reduced) {
+    v.removeAttribute('autoplay');
+    v.pause();
+  } else if (v.paused) {
+    // Some mobile browsers skip the autoplay attribute (data-saver modes); nudge playback once.
+    v.play().catch(() => {});
+  }
+});
+
 // Brand placeholder animation inside the showreel
 if ($('.reel', document) && !reduced) {
   const reel = gsap.timeline({ repeat: -1, defaults: { ease: 'expo.inOut', duration: 1.2 } });

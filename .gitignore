@@ -25,3 +25,10 @@ pnpm-debug.log*
 
 # local tooling
 .claude/
+
+# video projects: renders and snapshots are regenerated from source
+videos/*/renders/
+videos/*/snapshots/
+videos/*/.thumbnails/
+videos/*/.hyperframes/preview/
+videos/*/.hyperframes/anim-map/
