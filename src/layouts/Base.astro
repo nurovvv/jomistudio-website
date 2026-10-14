@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { ui, locales, localeLabels, type Locale } from '../i18n/ui';
+import { ui, locales, localeLabels, localePath, defaultLocale, type Locale } from '../i18n/ui';
 import { contact } from '../data/projects';
 import Button from '../components/Button.astro';
 import Mark from '../components/Mark.astro';
@@ -27,7 +27,8 @@ const links = [
     <meta property="og:image" content="/brand/jomi_avatar_light.svg" />
     <meta name="theme-color" content="#FFFFFF" />
     <link rel="icon" type="image/svg+xml" href="/brand/jomi_mark_light.svg" />
-    {locales.map((l) => <link rel="alternate" hreflang={l} href={`https://jomistudio.tj/${l}/`} />)}
+    {locales.map((l) => <link rel="alternate" hreflang={l} href={`https://jomistudio.tj${localePath(l)}`} />)}
+    <link rel="alternate" hreflang="x-default" href={`https://jomistudio.tj${localePath(defaultLocale)}`} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -50,7 +51,7 @@ const links = [
 
     <header class="header">
       <div class="header__bar">
-        <a href={`/${lang}/`} class="header__logo" aria-label="Jomi Studio">
+        <a href={localePath(lang)} class="header__logo" aria-label="Jomi Studio">
           <img class="header__logo-ink" src="/brand/jomi_logo_light.svg" alt="Jomi Studio" width="152" height="60" />
           <img class="header__logo-paper" src="/brand/jomi_logo_dark.svg" alt="" width="152" height="60" />
         </a>
@@ -63,7 +64,7 @@ const links = [
         </nav>
         <div class="header__right">
           <div class="langs">
-            {locales.map((l) => <a href={`/${l}/`} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{localeLabels[l]}</a>)}
+            {locales.map((l) => <a href={localePath(l)} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{localeLabels[l]}</a>)}
           </div>
           <Button href="#contact" label={t.nav.contact} class="header__cta" />
           <button class="burger" aria-label={t.menu} aria-expanded="false" aria-controls="menu">
@@ -83,7 +84,7 @@ const links = [
         <Button href="#contact" label={t.nav.contact} class="menu__cta" />
         <div class="menu__foot">
           <div class="langs">
-            {locales.map((l) => <a href={`/${l}/`} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{localeLabels[l]}</a>)}
+            {locales.map((l) => <a href={localePath(l)} class:list={['langs__a', { active: l === lang }]} hreflang={l}>{localeLabels[l]}</a>)}
           </div>
           <a href={`mailto:${contact.email}`}>{contact.email}</a>
           <a href={contact.instagram} target="_blank" rel="noopener">Instagram</a>
