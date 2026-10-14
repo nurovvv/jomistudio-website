@@ -2,6 +2,7 @@
 // Images/videos go in public/projects/ (e.g. image: '/projects/my-project.jpg').
 
 import type { Screen } from '../components/DeviceMock.astro';
+import type { Lift } from '../components/LiftScene.astro';
 
 type T = { en: string; ru: string; tg: string };
 
@@ -18,6 +19,11 @@ export type Project = {
    * each screen scrolls through a tall screenshot of the site on hover.
    */
   mockup?: { laptop: Screen; phone: Screen };
+  /**
+   * Tilted tablet whose screen cards lift off into the air on hover (see LiftScene.astro).
+   * `aspect` is the screen image's width / height; `balls` adds billiard balls.
+   */
+  lift?: { screen: string; aspect: number; cards: Lift[]; balls?: boolean };
   /** Card background (and placeholder colour until a real image is added) */
   color: string;
 };
@@ -63,21 +69,16 @@ export const projects: Project[] = [
       tg: 'Хазина ва ҳисоби мизҳо барои клуби билярд: вақти бозӣ, ҳисобҳо, пардохт ва ҳисоботҳо барои соҳиб',
     },
     // Internal tool, so no public link: the card leads to the contact form.
-    mockup: {
-      laptop: {
-        page: '/projects/bilyard/desktop.webp',
-        pageHeight: 1518,
-        viewHeight: 738,
-        top: '/projects/bilyard/desktop-top.png',
-        start: 0,
-      },
-      phone: {
-        page: '/projects/bilyard/mobile.webp',
-        pageHeight: 1716,
-        viewHeight: 844,
-        top: '/projects/bilyard/mobile-top.png',
-        start: 0,
-      },
+    // The tables board from the app (tablet, 2360x1640); three table cards lift off it
+    lift: {
+      screen: '/projects/bilyard/board.webp',
+      aspect: 2360 / 1640,
+      cards: [
+        { src: '/projects/bilyard/table-4.webp', x: 0.0114, y: 0.5744, w: 0.3195, h: 0.4177, z: 3, up: 10 },
+        { src: '/projects/bilyard/table-2.webp', x: 0.3403, y: 0.1439, w: 0.3195, h: 0.4177, z: 5, up: 15 },
+        { src: '/projects/bilyard/table-3.webp', x: 0.6691, y: 0.1439, w: 0.3195, h: 0.4177, z: 8, up: 20 },
+      ],
+      balls: true,
     },
     color: '#1F7049',
   },

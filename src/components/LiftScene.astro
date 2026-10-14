@@ -1,0 +1,43 @@
+---
+// A tablet lying tilted on a coloured backdrop, showing a real screen. Some of the
+// screen's cards are cut out and float above their own spot; main.ts lifts them higher
+// and leans the scene toward you while the card is hovered (or in view on touch
+// screens). Optional billiard balls sit beside the tablet. Sized in cqw of the card,
+// like DeviceMock.
+export type Lift = {
+  /** Cut-out of one card from the screen image, with transparent rounded corners */
+  src: string;
+  /** Its box on the screen, as fractions of the screen's width and height */
+  x: number; y: number; w: number; h: number;
+  /** Height above the screen at rest and when lifted, in cqw */
+  z: number; up: number;
+};
+interface Props { screen: string; aspect: number; cards: Lift[]; balls?: boolean; color: string }
+const { screen, aspect, cards, balls, color } = Astro.props;
+---
+<div class="lift" style={`--bg:${color}`} data-lift>
+  <div class="lift__tilt">
+    <div class="lift__stage" style={`--aspect:${aspect}`}>
+      <div class="lift__screen">
+        <img src={screen} alt="" loading="lazy" decoding="async" />
+        <span class="lift__glare"></span>
+      </div>
+      <div class="lift__layer">
+        {cards.map((c) => (
+          <div class="lift__item" data-up={c.up}
+            style={`--x:${c.x};--y:${c.y};--w:${c.w};--h:${c.h};--z:${c.z}`}>
+            <span class="lift__slot"></span>
+            <span class="lift__shade"></span>
+            <img class="lift__card" src={c.src} alt="" loading="lazy" decoding="async" />
+          </div>
+        ))}
+      </div>
+      {balls && (
+        <>
+          <div class="lift__ball lift__ball--eight"><span class="lift__ball-shadow"></span><span class="lift__ball-face"><b>8</b></span></div>
+          <div class="lift__ball lift__ball--cue"><span class="lift__ball-shadow"></span><span class="lift__ball-face"></span></div>
+        </>
+      )}
+    </div>
+  </div>
+</div>

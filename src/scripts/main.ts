@@ -374,6 +374,7 @@ if (!reduced) {
 
   initServices();
   initMocks();
+  initLifts();
 
   // Work cards rise in; right column drifts for a parallax offset
   $$('.card').forEach((card) =>
@@ -536,6 +537,63 @@ function initMocks() {
     if (finePointer) {
       card.addEventListener('pointerenter', play);
       card.addEventListener('pointerleave', stop);
+    } else {
+      ScrollTrigger.create({ trigger: card, start: 'top 75%', end: 'bottom 25%', onToggle: (st) => (st.isActive ? play() : stop()) });
+    }
+  });
+}
+
+/* ---------------- Project lift scenes ---------------- */
+// Hovering the card (on touch screens: having it in view) leans the tablet toward you,
+// lifts its cards higher, where they keep bobbing, and rolls the cue ball into the
+// 8-ball. On leave it all settles back. The pointer also tilts the scene a few degrees.
+function initLifts() {
+  $$('[data-lift]').forEach((scene) => {
+    const card = scene.closest<HTMLElement>('.card')!;
+    const tilt = $('.lift__tilt', scene);
+    const stage = $('.lift__stage', scene);
+    const items = $$('.lift__item', scene);
+    const cue = scene.querySelector<HTMLElement>('.lift__ball--cue');
+    const eight = scene.querySelector<HTMLElement>('.lift__ball--eight');
+
+    const tl = gsap.timeline({ paused: true });
+    tl.to(stage, { '--rx': '43deg', '--rz': '-27deg', duration: 1.6, ease: 'expo.inOut' }, 0)
+      .to(items, { '--z': (_: number, el: HTMLElement) => Number(el.dataset.up), duration: 1.3, stagger: 0.12, ease: 'expo.out' }, 0.2);
+    if (cue && eight) {
+      // Both sit on a line along the tablet's near edge. The cue ball runs up to the
+      // 8-ball and stops dead; the 8-ball carries on, spinning.
+      tl.to(cue, { '--bx': 22, duration: 0.55, ease: 'power2.in' }, 0.25)
+        .to(eight, { '--bx': 12, duration: 1.1, ease: 'power3.out' }, 0.8)
+        .to($('b', eight), { rotation: 160, duration: 1.1, ease: 'power3.out' }, 0.8);
+    }
+    const bobs = items.map((it, i) =>
+      gsap.to(it, { '--bob': 0.9, duration: 1.5 + i * 0.25, ease: 'sine.inOut', repeat: -1, yoyo: true, paused: true }));
+    let settle: gsap.core.Tween | undefined;
+
+    const play = () => {
+      settle?.kill();
+      tl.timeScale(1).play();
+      bobs.forEach((b) => b.restart());
+    };
+    const stop = () => {
+      tl.timeScale(1.5).reverse();
+      bobs.forEach((b) => b.pause());
+      settle = gsap.to(items, { '--bob': 0, duration: 0.8, ease: 'power2.out' });
+    };
+    if (finePointer) {
+      card.addEventListener('pointerenter', play);
+      card.addEventListener('pointerleave', () => {
+        stop();
+        gsap.to(tilt, { '--tx': 0, '--ty': 0, duration: 1.2, ease: 'expo.out', overwrite: 'auto' });
+      });
+      card.addEventListener('pointermove', (e) => {
+        const r = scene.getBoundingClientRect();
+        gsap.to(tilt, {
+          '--tx': ((e.clientX - r.left) / r.width - 0.5) * 10,
+          '--ty': -((e.clientY - r.top) / r.height - 0.5) * 8,
+          duration: 0.8, ease: 'power3.out', overwrite: 'auto',
+        });
+      });
     } else {
       ScrollTrigger.create({ trigger: card, start: 'top 75%', end: 'bottom 25%', onToggle: (st) => (st.isActive ? play() : stop()) });
     }
