@@ -67,9 +67,10 @@ export const showreel = {
 };
 
 // Client logos (SVG/PNG in public/clients/). `url` makes the logo a link to the client's
-// site (opens in a new tab). Entries without `logo` render as a placeholder.
+// site (opens in a new tab). Entries without `logo` show the name as a text wordmark.
 export const clients: { name: string; logo?: string; url?: string }[] = [
   { name: 'KIMCHI', logo: '/clients/kimchi.svg', url: 'https://kimchi-menu-dushanbe.netlify.app/' },
+  { name: 'Bilyard' },
 ];
 
 export type Testimonial = { name: string; role: string; text: T; color: 'mint' | 'lavender' | 'cream' };

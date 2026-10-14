@@ -102,7 +102,7 @@ const icons = [
             ? c.url
               ? <a class="clients__brand" href={c.url} target="_blank" rel="noopener" data-cursor="arrow"><img src={c.logo} alt="" loading="lazy" />{c.name}</a>
               : <span class="clients__brand"><img src={c.logo} alt="" loading="lazy" />{c.name}</span>
-            : <span class="clients__ph"><Mark ink="currentColor" accent="currentColor" />{c.name}</span>}
+            : <span class="clients__brand clients__brand--text">{c.name}</span>}
         </div>
       ))}
     </div>

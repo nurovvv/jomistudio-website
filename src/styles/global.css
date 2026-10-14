@@ -310,8 +310,8 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
 .clients__brand:hover img { transform: scale(1.06); }
 .clients__brand:hover { color: var(--ink); }
 .clients__brand:hover img { filter: none; opacity: 1; }
-.clients__ph { display: flex; align-items: center; gap: 8px; color: #b5b2ba; font-weight: 600; font-size: 15px; letter-spacing: -.01em; }
-.clients__ph svg { width: 22px; }
+/* Clients without a logo file: the name alone, as tall as a logo so the row lines up */
+.clients__brand--text { min-height: clamp(64px, calc(4.4vw + 16px), 76px); font-size: clamp(22px, 2vw, 28px); letter-spacing: -.01em; }
 @media (max-width: 700px) { .clients__grid { grid-template-columns: repeat(2, 1fr); } }
 /* With only a few clients, centre them instead of filling the first grid columns */
 .clients__grid--few { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(28px, 4vw, 56px) clamp(40px, 6vw, 96px); }
