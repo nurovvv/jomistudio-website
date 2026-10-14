@@ -110,10 +110,14 @@ gsap.set('[data-hero-fade], .hero__media-wrap', { autoAlpha: 0 });
 function heroIntro() {
   const words = splits.get($('.hero__title')) || [];
   gsap.set([...words, ...$$('[data-hero-fade], .hero__media-wrap')], { clearProps: 'transform,opacity,visibility' });
+  // The showreel opens out from a smaller rounded window
+  const media = $('.hero__media');
+  const r = parseFloat(getComputedStyle(media).borderTopLeftRadius) || 0;
   const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
   tl.from(words, { yPercent: 110, duration: 1.3, stagger: 0.045 })
     .from('[data-hero-fade]', { y: 24, autoAlpha: 0, duration: 1.2 }, 0.35)
-    .from('.hero__media-wrap', { y: 120, autoAlpha: 0, duration: 1.6 }, 0.45)
+    .from('.hero__media-wrap', { y: 80, autoAlpha: 0, duration: 1.6 }, 0.45)
+    .fromTo(media, { clipPath: `inset(7% 12% round ${r}px)` }, { clipPath: `inset(0% 0% round ${r}px)`, duration: 2.2, clearProps: 'clipPath' }, 0.45)
     .from('.header__bar', { autoAlpha: 0, y: -16, duration: 1.2 }, 0.3);
 }
 // Showreel block grows as it scrolls toward the top
@@ -158,13 +162,14 @@ ScrollTrigger.create({
   },
 });
 
-// Turns white while it sits over a dark section
-const darkZones = $$('.hero__media, .work, .faq, .footer').map((el) =>
-  ScrollTrigger.create({
-    trigger: el, start: 'top 36px', end: 'bottom 36px',
-    onToggle: () => header.classList.toggle('is-dark', darkZones.some((z) => z.isActive)),
-  }),
+// Turns white while it sits over a dark section. A zone already under the header at load
+// toggles while it is still being created, so the colour is synced once more after.
+const darkZones: ScrollTrigger[] = [];
+const syncHeader = () => header.classList.toggle('is-dark', darkZones.some((z) => z.isActive));
+$$('.hero__media, .work, .faq, .footer').forEach((el) =>
+  darkZones.push(ScrollTrigger.create({ trigger: el, start: 'top 36px', end: 'bottom 36px', onToggle: syncHeader })),
 );
+syncHeader();
 
 // Underlines the link of the section in view
 $$<HTMLAnchorElement>('.header__link').forEach((link) => {
@@ -344,11 +349,27 @@ if (!reduced) {
     gsap.from(el, { y: 50, autoAlpha: 0, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 92%' } }),
   );
 
-  // Staggered group (client logos)
-  gsap.set('[data-stagger]', { y: 50, autoAlpha: 0 });
+  // Staggered group (client logos): each one pops up from nothing
+  gsap.set('[data-stagger]', { scale: 0 });
   ScrollTrigger.batch('[data-stagger]', {
     start: 'top 92%',
-    onEnter: (els) => gsap.to(els, { y: 0, autoAlpha: 1, duration: 1.1, stagger: 0.07, ease: 'expo.out' }),
+    onEnter: (els) => gsap.to(els, { scale: 1, duration: 1.6, stagger: 0.1, ease: 'expo.out' }),
+  });
+
+  // Showreel drifts inside its frame as the page scrolls past (zoomed in a little so
+  // its edges never show)
+  const reelInner = $$('.hero__media > video, .hero__media > .reel');
+  gsap.set(reelInner, { scale: 1.1 });
+  gsap.fromTo(reelInner, { yPercent: -4.5 }, {
+    yPercent: 4.5, ease: 'none',
+    scrollTrigger: { trigger: '.hero__media', start: 'top bottom', end: 'bottom top', scrub: true },
+  });
+
+  // Call-to-action buttons grow out of a thin line, then their label rises in
+  $$('[data-pop]').forEach((btn) => {
+    gsap.timeline({ scrollTrigger: { trigger: btn, start: 'top 94%' } })
+      .fromTo(btn, { scaleX: 0, scaleY: 0.5 }, { scaleX: 1, scaleY: 1, duration: 1.5, ease: 'expo.out' })
+      .from($('.btn__roll', btn), { yPercent: 110, scale: 0.6, duration: 1.2, ease: 'expo.out' }, 0.1);
   });
 
   initServices();
@@ -521,6 +542,61 @@ function initMocks() {
   });
 }
 
+/* ---------------- Dividers: rules that twang like a plucked string ---------------- */
+// Each rule is a quadratic curve in an SVG that reaches 60px above and below it. Rules
+// draw in from the left as they scroll into view. When the pointer crosses one, its
+// middle is dragged along in the direction of travel, then let go with an elastic wobble.
+function initDividers() {
+  const mid = 60.5; // the line's y inside the SVG; .5 keeps a 1px stroke crisp
+  const curve = (w: number, x = w / 2, y = mid) => `M0,${mid} Q${x},${y} ${w},${mid}`;
+  const lines = $$('.divider').map((el) => ({ el, svg: $('svg', el), path: $('path', el), w: 0 }));
+  if (!lines.length) return;
+  const size = () => lines.forEach((l) => {
+    l.w = l.el.offsetWidth;
+    gsap.killTweensOf(l.path);
+    l.path.setAttribute('d', curve(l.w));
+  });
+  size();
+  addEventListener('resize', size);
+  lines.forEach((l) => l.el.classList.add('is-live'));
+  if (reduced) return;
+
+  lines.forEach((l) => gsap.from(l.svg, {
+    scaleX: 0, transformOrigin: '0 50%', duration: 2.4, ease: 'expo.out',
+    scrollTrigger: { trigger: l.el, start: 'top 92%' },
+  }));
+
+  if (!finePointer) return;
+  // Only rules on screen are tested against the pointer
+  const onScreen = new Set<(typeof lines)[number]>();
+  const io = new IntersectionObserver((entries) => entries.forEach((en) => {
+    const l = lines.find((x) => x.el === en.target)!;
+    if (en.isIntersecting) onScreen.add(l); else onScreen.delete(l);
+  }), { rootMargin: '60px 0px' });
+  lines.forEach((l) => io.observe(l.el));
+
+  const pluck = (l: (typeof lines)[number], x: number, dy: number) => {
+    // Faster crossings pull further; even a slow one gives a small twang
+    const pull = Math.sign(dy) * gsap.utils.clamp(10, 36, Math.abs(dy) * 1.4);
+    gsap.killTweensOf(l.path);
+    gsap.timeline()
+      .to(l.path, { attr: { d: curve(l.w, x, mid + pull * 2) }, duration: 0.14, ease: 'power2.out' })
+      .to(l.path, { attr: { d: curve(l.w, x) }, duration: 1.8, ease: 'elastic.out(1, 0.2)' });
+  };
+  let prevY = NaN;
+  addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const y = e.clientY;
+    onScreen.forEach((l) => {
+      const r = l.el.getBoundingClientRect();
+      const lineY = r.top + r.height / 2;
+      if (e.clientX < r.left || e.clientX > r.right || !((prevY - lineY) * (y - lineY) < 0)) return;
+      pluck(l, e.clientX - r.left, y - prevY);
+    });
+    prevY = y;
+  });
+}
+
 /* ---------------- FAQ accordion ---------------- */
 // Row height eases open, the answer fades up into place, and the "+" turns into
 // an "x" (CSS). Opening one question closes the others.
@@ -546,5 +622,6 @@ $$('.faq__item').forEach((item) => {
 });
 
 /* ---------------- Go ---------------- */
+initDividers();
 document.fonts?.ready.then(() => ScrollTrigger.refresh());
 revealPage();

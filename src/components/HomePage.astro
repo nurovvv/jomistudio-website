@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Button from './Button.astro';
 import Mark from './Mark.astro';
 import DeviceMock from './DeviceMock.astro';
+import Divider from './Divider.astro';
 import { ui, type Locale } from '../i18n/ui';
 import { projects, clients, testimonials, contact, showreel } from '../data/projects';
 
@@ -136,8 +137,8 @@ const icons = [
         ))}
       </div>
       {projects.length > 1 && (
-        <div class="work__more" data-fade>
-          <Button href="#contact" label={t.work.all} variant="outline-light" />
+        <div class="work__more">
+          <Button href="#contact" label={t.work.all} variant="outline-light" data-pop />
         </div>
       )}
     </div>
@@ -162,6 +163,7 @@ const icons = [
   <!-- WHY -->
   <section class="why wrap">
     <div class="why__top">
+      <Divider />
       <span class="eyebrow">{t.why.label}</span>
       <p class="why__text" data-scrub-words>{t.why.text}</p>
     </div>
@@ -182,12 +184,14 @@ const icons = [
     <div class="wrap">
       <h2 class="h2" data-split>{t.faq.title}</h2>
       <div class="faq__list">
+        <Divider />
         {t.faq.items.map((f) => (
           <div class="faq__item" data-fade>
             <button class="faq__q" aria-expanded="false">
               <span>{f.q}</span><i class="faq__icon" aria-hidden="true"></i>
             </button>
             <div class="faq__a"><p>{f.a}</p></div>
+            <Divider class="divider--bottom" />
           </div>
         ))}
       </div>
@@ -203,10 +207,11 @@ const icons = [
     <div class="footer__cta">
       <h2 class="footer__title" data-split>{t.footer.cta.map((l) => <span class="hero__line">{l}</span>)}</h2>
       <p class="footer__sub" data-fade>{t.footer.sub}</p>
-      <div data-fade><Button href={`mailto:${contact.email}`} label={t.footer.button} variant="light" /></div>
+      <div><Button href={`mailto:${contact.email}`} label={t.footer.button} variant="light" data-pop /></div>
     </div>
 
     <div class="footer__bottom wrap">
+      <Divider />
       <div class="footer__contacts">
         <div>
           <Button href={`mailto:${contact.email}`} label={contact.email} variant="outline-light" />

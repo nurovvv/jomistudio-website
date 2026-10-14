@@ -1,0 +1,7 @@
+---
+// Hairline rule that draws in from the left and twangs like a plucked string when the
+// pointer crosses it (main.ts). Sits on the top edge of its positioned parent; add
+// `divider--bottom` for the bottom edge. Without JS it is a plain 1px border.
+interface Props { class?: string }
+---
+<div class:list={['divider', Astro.props.class]} aria-hidden="true"><svg><path /></svg></div>
