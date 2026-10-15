@@ -209,7 +209,7 @@ const icons = [
     <div class="footer__cta">
       <h2 class="footer__title" data-split>{t.footer.cta.map((l) => <span class="hero__line">{l}</span>)}</h2>
       <p class="footer__sub" data-fade>{t.footer.sub}</p>
-      <div><Button href={`mailto:${contact.email}`} label={t.footer.button} variant="light" data-pop /></div>
+      <div><Button href={contact.telegram} label={t.footer.button} variant="light" target="_blank" rel="noopener" data-pop /></div>
     </div>
 
     <div class="footer__bottom wrap">
@@ -239,7 +239,7 @@ const icons = [
           </a>
           {contact.telegram && (
             <a href={contact.telegram} target="_blank" rel="noopener" aria-label="Telegram" class="social magnetic">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 4 3 11l6 2 2 6 3-4 5 4z"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 4.6 3 11.6c-.8.3-.8 1.5.1 1.7l4.6 1.4 1.7 5.4c.2.7 1.1.9 1.6.4l2.5-2.4 4.8 3.5c.6.4 1.5.1 1.6-.6L22.9 5.9c.2-.9-.8-1.6-1.7-1.3Z"/><path d="m7.7 14.7 9.6-6.9-7 7.9"/></svg>
             </a>
           )}
         </div>

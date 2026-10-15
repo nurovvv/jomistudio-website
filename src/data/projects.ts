@@ -111,5 +111,5 @@ export const contact = {
   email: 'hello@jomistudio.tj',
   phone: '',
   instagram: 'https://instagram.com/jomistudio.tj',
-  telegram: '',
+  telegram: 'https://t.me/jomistudio',
 };
