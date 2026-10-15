@@ -39,7 +39,7 @@ const en = {
     label: 'Why Jomi',
     text: 'We are a small, focused team, so every project gets senior attention from the first call to launch — and we stay with you after it.',
     cards: [
-      { value: 1, suffix: ' month', label: 'Free support after launch' },
+      { value: 10, suffix: ' days', label: 'Free support after launch' },
       { label: 'Strategy, design & development — one team, start to finish' },
       { value: 100, suffix: '%', label: 'Every site mobile-first, fast and SEO-ready' },
       { label: 'Built around your goal — more calls, orders and bookings, not just a pretty page' },
@@ -96,7 +96,7 @@ const ru: Dict = {
     label: 'Почему Jomi',
     text: 'Мы небольшая сфокусированная команда, поэтому каждый проект от первого звонка до запуска ведут опытные специалисты — и мы остаёмся рядом после запуска.',
     cards: [
-      { value: 1, suffix: ' месяц', label: 'Бесплатной поддержки после запуска' },
+      { value: 10, suffix: ' дней', label: 'Бесплатной поддержки после запуска' },
       { label: 'Стратегия, дизайн и разработка — одна команда от начала до конца' },
       { value: 100, suffix: '%', label: 'Сайтов с мобильной версией, высокой скоростью и готовых к SEO' },
       { label: 'Проектируем под вашу цель — больше звонков, заказов и записей, а не просто красивую страницу' },
@@ -151,7 +151,7 @@ const tg: Dict = {
     label: 'Чаро Jomi',
     text: 'Мо дастаи хурд ва мутамарказ ҳастем, бинобар ин ҳар лоиҳаро аз занги аввал то оғоз мутахассисони ботаҷриба пеш мебаранд — ва пас аз оғоз низ дар паҳлӯи шумо мемонем.',
     cards: [
-      { value: 1, suffix: ' моҳ', label: 'Дастгирии ройгон пас аз оғоз' },
+      { value: 10, suffix: ' рӯз', label: 'Дастгирии ройгон пас аз оғоз' },
       { label: 'Стратегия, дизайн ва барномасозӣ — як даста аз аввал то охир' },
       { value: 100, suffix: '%', label: 'Сайтҳо бо версияи мобилӣ, суръати баланд ва омода барои SEO' },
       { label: 'Мувофиқи ҳадафи шумо месозем — зангҳо, фармоишҳо ва сабтҳои бештар, на танҳо саҳифаи зебо' },
