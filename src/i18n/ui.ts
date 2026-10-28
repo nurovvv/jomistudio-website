@@ -10,6 +10,7 @@ export const localePath = (l: Locale) => (l === defaultLocale ? '/' : `/${l}/`);
 export const localeLabels: Record<Locale, string> = { en: 'EN', ru: 'RU', tg: 'TJ' };
 
 const en = {
+  title: 'Jomi Studio — digital design & development studio in Dushanbe',
   meta: 'Jomi Studio — digital design & development studio in Dushanbe. Brands, websites and digital products.',
   nav: { services: 'Services', work: 'Work', about: 'About', faq: 'FAQ', contact: 'Contact' },
   menu: 'Menu',
@@ -67,6 +68,7 @@ const en = {
 export type Dict = typeof en;
 
 const ru: Dict = {
+  title: 'Jomi Studio — студия цифрового дизайна и разработки в Душанбе',
   meta: 'Jomi Studio — студия цифрового дизайна и разработки в Душанбе. Бренды, сайты и цифровые продукты.',
   nav: { services: 'Услуги', work: 'Работы', about: 'О нас', faq: 'FAQ', contact: 'Контакты' },
   menu: 'Меню',
@@ -122,6 +124,7 @@ const ru: Dict = {
 };
 
 const tg: Dict = {
+  title: 'Jomi Studio — студияи тарҳрезӣ ва барномасозии рақамӣ дар Душанбе',
   meta: 'Jomi Studio — студияи тарҳрезӣ ва барномасозии рақамӣ дар Душанбе. Брендҳо, сайтҳо ва маҳсулоти рақамӣ.',
   nav: { services: 'Хизматҳо', work: 'Корҳо', about: 'Дар бораи мо', faq: 'Саволҳо', contact: 'Тамос' },
   menu: 'Меню',

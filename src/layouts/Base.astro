@@ -14,21 +14,45 @@ const links = [
   ['#about', t.nav.about],
   ['#faq', t.nav.faq],
 ];
+// Absolute addresses for search engines and link previews (site is set in astro.config)
+const abs = (path: string) => new URL(path, Astro.site).href;
+const ogLocale: Record<Locale, string> = { en: 'en_US', ru: 'ru_RU', tg: 'tg_TJ' };
+// Business card for Google: who we are, where, and our other profiles
+const org = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Jomi Studio',
+  url: abs('/'),
+  logo: abs('/brand/jomi_mark_light.svg'),
+  description: t.meta,
+  email: contact.email,
+  address: { '@type': 'PostalAddress', addressLocality: 'Dushanbe', addressCountry: 'TJ' },
+  sameAs: [contact.instagram, contact.telegram].filter(Boolean),
+};
 ---
 <!doctype html>
 <html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Jomi Studio</title>
+    <title>{t.title}</title>
     <meta name="description" content={t.meta} />
-    <meta property="og:title" content="Jomi Studio" />
+    <link rel="canonical" href={abs(localePath(lang))} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Jomi Studio" />
+    <meta property="og:url" content={abs(localePath(lang))} />
+    <meta property="og:locale" content={ogLocale[lang]} />
+    <meta property="og:title" content={t.title} />
     <meta property="og:description" content={t.meta} />
-    <meta property="og:image" content="/brand/jomi_avatar_light.svg" />
+    <meta property="og:image" content={abs('/showreel/jomi-showreel-poster.jpg')} />
+    <meta property="og:image:width" content="2560" />
+    <meta property="og:image:height" content="1440" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#FFFFFF" />
     <link rel="icon" type="image/svg+xml" href="/brand/jomi_mark_light.svg" />
-    {locales.map((l) => <link rel="alternate" hreflang={l} href={`https://jomistudio.tj${localePath(l)}`} />)}
-    <link rel="alternate" hreflang="x-default" href={`https://jomistudio.tj${localePath(defaultLocale)}`} />
+    {locales.map((l) => <link rel="alternate" hreflang={l} href={abs(localePath(l))} />)}
+    <link rel="alternate" hreflang="x-default" href={abs(localePath(defaultLocale))} />
+    <script type="application/ld+json" set:html={JSON.stringify(org)} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet" />
