@@ -26,6 +26,7 @@ const org = {
   logo: abs('/brand/jomi_mark_light.svg'),
   description: t.meta,
   email: contact.email,
+  telephone: contact.phone.replace(/\s/g, ''),
   address: { '@type': 'PostalAddress', addressLocality: 'Dushanbe', addressCountry: 'TJ' },
   sameAs: [contact.instagram, contact.telegram].filter(Boolean),
 };

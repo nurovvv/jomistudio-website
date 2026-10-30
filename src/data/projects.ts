@@ -148,7 +148,7 @@ export const testimonials: Testimonial[] = [];
 
 export const contact = {
   email: 'hello@jomistudio.tj',
-  phone: '',
+  phone: '+992 00 001 02 72',
   instagram: 'https://instagram.com/jomistudio.tj',
   telegram: 'https://t.me/jomistudio',
 };

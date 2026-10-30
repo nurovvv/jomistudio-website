@@ -218,14 +218,9 @@ const icons = [
       <Divider />
       <div class="footer__contacts">
         <div>
-          <Button href={`mailto:${contact.email}`} label={contact.email} variant="outline-light" />
+          <Button href={`tel:${contact.phone.replace(/\s/g, '')}`} label={contact.phone} variant="outline-light" />
           <span class="footer__meta">{t.footer.office}</span>
         </div>
-        {contact.phone && (
-          <div>
-            <Button href={`tel:${contact.phone.replace(/\s/g, '')}`} label={contact.phone} variant="outline-light" />
-          </div>
-        )}
       </div>
       <nav class="footer__nav">
         <a href="#services" class="roll" data-text={t.nav.services}><span>{t.nav.services}</span></a>
