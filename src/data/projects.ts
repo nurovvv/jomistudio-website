@@ -3,6 +3,7 @@
 
 import type { Screen } from '../components/DeviceMock.astro';
 import type { Lift } from '../components/LiftScene.astro';
+import type { Scan } from '../components/ScanScene.astro';
 
 type T = { en: string; ru: string; tg: string };
 
@@ -24,6 +25,8 @@ export type Project = {
    * `aspect` is the screen image's width / height; `balls` adds billiard balls.
    */
   lift?: { screen: string; aspect: number; cards: Lift[]; balls?: boolean };
+  /** QR table stand beside a phone showing the menu it opens (see ScanScene.astro) */
+  scan?: Scan;
   /** Card background (and placeholder colour until a real image is added) */
   color: string;
 };
@@ -82,6 +85,34 @@ export const projects: Project[] = [
     },
     color: '#1F7049',
   },
+  {
+    slug: 'odiliyon',
+    title: 'Odiliyon',
+    caption: {
+      en: 'QR-code menu for Odiliyon, a teahouse in Vahdat: dishes, prices and photos in three languages',
+      ru: 'Меню по QR-коду для чайханы «Одилиён» в Вахдате: блюда, цены и фото на трёх языках',
+      tg: 'Менюи рақамӣ бо QR-рамз барои чойхонаи «Одилиён» дар Ваҳдат: таомҳо, нархҳо ва аксҳо бо се забон',
+    },
+    url: 'https://odiliyon.pages.dev/',
+    // Captured from the live menu at 390x844 @3x. The stand's QR code opens the real menu.
+    scan: {
+      qr: '/projects/odiliyon/qr.svg',
+      mark: '/projects/odiliyon/mark.svg',
+      wordmark: { src: '/projects/odiliyon/wordmark.png', aspect: 3.4145 },
+      tagline: { src: '/projects/odiliyon/tagline.png', aspect: 8.3962 },
+      phone: {
+        page: '/projects/odiliyon/mobile.webp',
+        pageHeight: 3800,
+        viewHeight: 844,
+        top: '/projects/odiliyon/mobile-top.png',
+        pin: { src: '/projects/odiliyon/mobile-pin.png', at: 628 },
+        start: 0,
+        travel: 2900,
+      },
+      dishes: ['/projects/odiliyon/dish-1.webp', '/projects/odiliyon/dish-2.webp', '/projects/odiliyon/dish-3.webp'],
+    },
+    color: '#1F3A8A',
+  },
 ];
 
 // Hero showreel (source project: videos/jomi-showreel, rendered at 4K and downscaled).
@@ -99,6 +130,7 @@ export const showreel = {
 export const clients: { name: string; logo?: string; url?: string }[] = [
   { name: 'KIMCHI', logo: '/clients/kimchi.svg', url: 'https://kimchi-menu-dushanbe.netlify.app/' },
   { name: 'Bilyard', logo: '/clients/bilyard.svg' },
+  { name: 'Odiliyon', logo: '/clients/odiliyon.svg', url: 'https://odiliyon.pages.dev/' },
 ];
 
 export type Testimonial = { name: string; role: string; text: T; color: 'mint' | 'lavender' | 'cream' };

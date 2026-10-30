@@ -1,0 +1,80 @@
+---
+// A QR table stand next to a phone showing the menu that the code opens (the code is
+// real). main.ts plays the scan on hover (in view on touch screens): a light sweeps
+// over the code and pings the phone, the phone scrolls through the menu, and dish cards
+// float out from behind it. Sized in cqw of the card, like DeviceMock and LiftScene.
+import type { Screen } from './DeviceMock.astro';
+
+export type Scan = {
+  /** Square QR code, black on transparent (tinted through a CSS mask) */
+  qr: string;
+  /** Logo mark for the stand, plus wordmark and tagline as alpha masks with their aspect ratios */
+  mark: string;
+  wordmark: { src: string; aspect: number };
+  tagline?: { src: string; aspect: number };
+  /** The phone's page. `pin` is a taller top strip that takes over once the page has scrolled `at` px. */
+  phone: Screen & { pin?: { src: string; at: number } };
+  /** Up to three cards that float out around the phone */
+  dishes: string[];
+};
+interface Props extends Scan { color: string }
+const { qr, mark, wordmark, tagline, phone, dishes, color } = Astro.props;
+
+const pct = (px: number) => ((px / phone.pageHeight) * 100).toFixed(3);
+const start = pct(phone.start);
+const end = pct(Math.min(phone.start + (phone.travel ?? 1900), phone.pageHeight - phone.viewHeight));
+// Where each dish card floats on hover (left/top in cqw, tilt in deg), and the offset
+// in cqw that tucks it behind the phone at rest
+const spots = [
+  { left: 33, top: 9, r: -9, tuck: [22, 20] },
+  { left: 76, top: 6, r: 9, tuck: [-12.5, 30.5] },
+  { left: 39, top: 89, r: -6, tuck: [17, -19] },
+];
+const mask = (src: string) => `--m:url(${src})`;
+---
+<div class="scan" style={`--bg:${color}`} data-scan data-pin={phone.pin ? pct(phone.pin.at) : ''}>
+  <span class="scan__ghost" style={`${mask(wordmark.src)};--a:${wordmark.aspect}`}></span>
+
+  <div class="scan__stand">
+    <div class="scan__face">
+      <img class="scan__mark" src={mark} alt="" loading="lazy" />
+      <span class="scan__wordmark" style={`${mask(wordmark.src)};--a:${wordmark.aspect}`}></span>
+      {tagline && <span class="scan__tagline" style={`${mask(tagline.src)};--a:${tagline.aspect}`}></span>}
+      <div class="scan__qr">
+        <span class="scan__code" style={mask(qr)}></span>
+        <span class="scan__corner scan__corner--tl"></span><span class="scan__corner scan__corner--tr"></span>
+        <span class="scan__corner scan__corner--bl"></span><span class="scan__corner scan__corner--br"></span>
+        <span class="scan__beam"></span>
+        <span class="scan__ping"></span>
+      </div>
+    </div>
+    <div class="scan__base"></div>
+  </div>
+
+  {dishes.slice(0, spots.length).map((src, i) => {
+    const s = spots[i];
+    return (
+      <img class="scan__dish" src={src} alt="" loading="lazy" decoding="async" data-r={s.r}
+        style={`left:${s.left}cqw;top:${s.top}cqw;--dx:${s.tuck[0]};--dy:${s.tuck[1]};--r:${s.r / 2};--s:.8`} />
+    );
+  })}
+
+  <div class="scan__phone">
+    <div class="mock__phone">
+      <div class="mock__screen">
+        <div class="mock__status" aria-hidden="true">
+          <span>9:41</span>
+          <span class="mock__icons"><i></i><i></i><i></i><i></i><b></b></span>
+        </div>
+        <div class="mock__view">
+          <img class="mock__page" src={phone.page} alt="" loading="lazy" decoding="async"
+            data-start={start} data-end={end} style={`transform: translateY(-${start}%)`} />
+          {phone.top && <img class="mock__bar mock__bar--top" src={phone.top} alt="" loading="lazy" />}
+          {phone.pin && <img class="mock__bar mock__bar--top scan__pin" src={phone.pin.src} alt="" loading="lazy" />}
+          <span class="scan__flash"></span>
+        </div>
+        <span class="mock__island"></span>
+      </div>
+    </div>
+  </div>
+</div>

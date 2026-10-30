@@ -506,6 +506,88 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
   background: #f6f4ee; color: #111; font-size: 1.7cqw; font-weight: 700; line-height: 1;
 }
 
+/* Scan scene (ScanScene.astro): the client's fluted wall under a warm lamp, a QR table
+   stand on the left and the DeviceMock phone, enlarged, on the right. main.ts animates
+   --scan (beam), --gx (ghost wordmark), the phone's --px/--py/--pr and each dish's
+   --dx/--dy/--r/--s/--bob. */
+.scan {
+  --shade: color-mix(in srgb, var(--bg) 26%, #000);
+  position: absolute; inset: 0; overflow: hidden;
+  background:
+    radial-gradient(75% 45% at 50% 0%, rgba(230,204,150,.24), transparent 66%),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.16) 0 .1cqw, rgba(255,255,255,.04) .1cqw .2cqw, transparent .2cqw .65cqw),
+    radial-gradient(100% 60% at 50% 115%, color-mix(in srgb, var(--bg), #000 45%), transparent 70%),
+    var(--bg);
+}
+/* Alpha-mask images (wordmark, tagline, QR) take the element's background colour */
+.scan__ghost, .scan__wordmark, .scan__tagline, .scan__code {
+  display: block; -webkit-mask: var(--m) center / 100% 100% no-repeat; mask: var(--m) center / 100% 100% no-repeat;
+}
+.scan__ghost {
+  position: absolute; left: 5cqw; top: 4cqw; width: 90cqw; aspect-ratio: var(--a);
+  --gx: 0; background: rgba(251,246,236,.08); translate: calc(var(--gx) * 1cqw) 0;
+}
+
+/* Table stand: a cream card in a brass frame, turned a little toward the phone */
+.scan__stand {
+  position: absolute; left: 6cqw; top: 33cqw; width: 40cqw; z-index: 1;
+  transform: perspective(120cqw) rotateY(14deg); transform-origin: 50% 100%;
+}
+.scan__stand::after {
+  content: ''; position: absolute; left: 2%; right: -8%; bottom: -3.2cqw; height: 5cqw; z-index: -1;
+  border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.5), transparent);
+}
+.scan__face {
+  display: flex; flex-direction: column; align-items: center; gap: 1.3cqw;
+  padding: 3.4cqw 3.4cqw 3.8cqw; border-radius: 2.6cqw;
+  background: linear-gradient(160deg, rgba(255,255,255,.6), transparent 38%), #F5F1E8;
+  box-shadow: inset 0 0 0 .45cqw #B49969, inset 0 0 0 .95cqw #F5F1E8, inset 0 0 0 1.1cqw rgba(180,153,105,.55),
+    0 2.4cqw 4cqw -1cqw rgba(0,0,0,.45);
+}
+.scan__mark { width: 4.4cqw; }
+.scan__wordmark { width: 31cqw; aspect-ratio: var(--a); background: #1F3A8A; }
+.scan__tagline { width: 19cqw; aspect-ratio: var(--a); margin-top: -.4cqw; background: rgba(31,58,138,.72); }
+.scan__qr { position: relative; width: 24cqw; aspect-ratio: 1; margin-top: 1.4cqw; }
+.scan__code { position: absolute; inset: 0; background: #16296A; }
+.scan__corner { position: absolute; width: 4.4cqw; height: 4.4cqw; border: .45cqw solid #B49969; }
+.scan__corner--tl { left: -2cqw; top: -2cqw; border-right: 0; border-bottom: 0; border-top-left-radius: 1cqw; }
+.scan__corner--tr { right: -2cqw; top: -2cqw; border-left: 0; border-bottom: 0; border-top-right-radius: 1cqw; }
+.scan__corner--bl { left: -2cqw; bottom: -2cqw; border-right: 0; border-top: 0; border-bottom-left-radius: 1cqw; }
+.scan__corner--br { right: -2cqw; bottom: -2cqw; border-left: 0; border-top: 0; border-bottom-right-radius: 1cqw; }
+/* Scanning light: a soft amber band whose lower edge glows, swept down by --scan */
+.scan__beam {
+  --scan: 0; position: absolute; left: -6%; right: -6%; height: 3.4cqw; top: calc(var(--scan) * 100% - 3.4cqw);
+  opacity: 0; visibility: hidden;
+  background: linear-gradient(to bottom, transparent, rgba(232,163,58,.32) 72%, #F7C76A);
+  box-shadow: 0 .3cqw 1.6cqw rgba(247,199,106,.85);
+}
+.scan__ping {
+  position: absolute; left: 50%; top: 50%; width: 12cqw; aspect-ratio: 1; translate: -50% -50%;
+  border-radius: 50%; border: .35cqw solid #F7C76A; opacity: 0; visibility: hidden; scale: .3;
+}
+.scan__base {
+  width: 62%; height: 2cqw; margin: -.3cqw auto 0; border-radius: 0 0 1.2cqw 1.2cqw;
+  background: linear-gradient(#CDB283, #8C7246);
+}
+
+/* Dish cards: tucked behind the phone at rest, floating around it on hover */
+.scan__dish {
+  --bob: 0; position: absolute; width: 19cqw; z-index: 2; border-radius: 1.4cqw;
+  box-shadow: 0 1.6cqw 3cqw -.6cqw rgba(0,0,0,.5);
+  translate: calc(var(--dx) * 1cqw) calc((var(--dy) + var(--bob)) * 1cqw);
+  rotate: calc(var(--r) * 1deg); scale: var(--s);
+}
+
+/* The DeviceMock phone, scaled up 1.44x around its centre and moved by the scene */
+.scan__phone {
+  --px: 0; --py: 0; --pr: 6;
+  position: absolute; left: 57cqw; top: 36cqw; width: 25cqw; aspect-ratio: 440 / 975; z-index: 3;
+  translate: calc(var(--px) * 1cqw) calc(var(--py) * 1cqw); rotate: calc(var(--pr) * 1deg); scale: 1.44;
+}
+.scan .mock__phone, .card:hover .scan .mock__phone { left: 0; top: 0; rotate: none; translate: none; }
+.scan__pin { opacity: 0; }
+.scan__flash { position: absolute; inset: 0; background: #fff; opacity: 0; visibility: hidden; }
+
 .card__caption { margin-top: 18px; font-size: clamp(14px, 1.1vw, 16px); line-height: 1.4; max-width: 420px; color: rgba(255,255,255,.88); }
 .work__more { display: flex; justify-content: center; margin-top: clamp(60px, 8vw, 110px); }
 /* When no testimonials section follows, round the black section's bottom too */

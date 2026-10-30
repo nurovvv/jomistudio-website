@@ -375,6 +375,7 @@ if (!reduced) {
   initServices();
   initMocks();
   initLifts();
+  initScans();
 
   // Work cards rise in; right column drifts for a parallax offset
   $$('.card').forEach((card) =>
@@ -594,6 +595,76 @@ function initLifts() {
           duration: 0.8, ease: 'power3.out', overwrite: 'auto',
         });
       });
+    } else {
+      ScrollTrigger.create({ trigger: card, start: 'top 75%', end: 'bottom 25%', onToggle: (st) => (st.isActive ? play() : stop()) });
+    }
+  });
+}
+
+/* ---------------- Project scan scenes ---------------- */
+// Hovering the card (on touch screens: having it in view) scans the QR code on the
+// stand: a light sweeps down it and pings the phone, which tilts up and scrolls through
+// the menu while the dish cards float out from behind it and bob. On leave it all
+// settles back. Everything starts from its CSS rest state, so the timeline only uses
+// to() tweens and plays back cleanly in reverse.
+function initScans() {
+  $$('[data-scan]').forEach((scene) => {
+    const card = scene.closest<HTMLElement>('.card')!;
+    const page = $('.mock__page', scene);
+    const pin = scene.querySelector<HTMLElement>('.scan__pin');
+    const pinAt = Number(scene.dataset.pin);
+    const beam = $('.scan__beam', scene);
+    const ping = $('.scan__ping', scene);
+    const flash = $('.scan__flash', scene);
+    const dishes = $$('.scan__dish', scene);
+
+    const tl = gsap.timeline({ paused: true });
+    tl.to($$('.scan__corner', scene), { scale: 1.12, duration: 0.25, ease: 'power2.out', yoyo: true, repeat: 1 }, 0)
+      .to(beam, { autoAlpha: 1, duration: 0.15 }, 0.05)
+      .to(beam, { '--scan': 1, duration: 0.9, ease: 'power1.inOut' }, 0.05)
+      .to(beam, { autoAlpha: 0, duration: 0.25 }, 0.9)
+      .to(ping, { autoAlpha: 0.9, duration: 0.05 }, 0.8)
+      .to(ping, { scale: 4, autoAlpha: 0, duration: 1, ease: 'power2.out' }, 0.85)
+      .to($('.scan__phone', scene), { '--pr': 1.5, '--py': -1.5, duration: 1.3, ease: 'expo.out' }, 0.85)
+      .to(flash, { autoAlpha: 0.5, duration: 0.08 }, 0.95)
+      .to(flash, { autoAlpha: 0, duration: 0.5, ease: 'power2.out' }, 1.03)
+      .to($('.scan__ghost', scene), { '--gx': -3, duration: 2.6, ease: 'power2.out' }, 0)
+      .to(dishes, {
+        '--dx': 0, '--dy': 0, '--r': (_: number, el: HTMLElement) => Number(el.dataset.r), '--s': 1,
+        duration: 1.2, stagger: 0.14, ease: 'expo.out',
+      }, 1.15);
+
+    // The menu scrolls up and down while hovered; the category bar pins once the page
+    // has scrolled past it, like on the real site
+    page.style.transform = '';
+    const scroll = gsap.timeline({ paused: true, repeat: -1, yoyo: true, repeatDelay: 0.8 });
+    scroll.fromTo(page, { yPercent: -Number(page.dataset.start) }, {
+      yPercent: -Number(page.dataset.end), duration: 6.5, ease: 'sine.inOut',
+      onUpdate: () => { if (pin) pin.style.opacity = -(gsap.getProperty(page, 'yPercent') as number) >= pinAt ? '1' : '0'; },
+    });
+    const bobs = dishes.map((d, i) =>
+      gsap.to(d, { '--bob': 0.8 + i * 0.2, duration: 1.6 + i * 0.3, ease: 'sine.inOut', repeat: -1, yoyo: true, paused: true }));
+    let begin: gsap.core.Tween | undefined;
+    let rewind: gsap.core.Tween | undefined;
+    let settle: gsap.core.Tween | undefined;
+
+    const play = () => {
+      rewind?.kill();
+      settle?.kill();
+      tl.timeScale(1).play();
+      begin = gsap.delayedCall(1, () => { scroll.play(); bobs.forEach((b) => b.restart()); });
+    };
+    const stop = () => {
+      begin?.kill();
+      tl.timeScale(1.5).reverse();
+      scroll.pause();
+      rewind = gsap.to(scroll, { totalTime: 0, duration: 1.2, ease: 'expo.out' });
+      bobs.forEach((b) => b.pause());
+      settle = gsap.to(dishes, { '--bob': 0, duration: 0.8, ease: 'power2.out' });
+    };
+    if (finePointer) {
+      card.addEventListener('pointerenter', play);
+      card.addEventListener('pointerleave', stop);
     } else {
       ScrollTrigger.create({ trigger: card, start: 'top 75%', end: 'bottom 25%', onToggle: (st) => (st.isActive ? play() : stop()) });
     }
