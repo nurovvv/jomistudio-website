@@ -327,9 +327,16 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
 .clients__brand:hover img { filter: none; opacity: 1; }
 /* Clients without a logo file: the name alone, as tall as a logo so the row lines up */
 .clients__brand--text { min-height: clamp(64px, calc(4.4vw + 16px), 76px); font-size: clamp(22px, 2vw, 28px); letter-spacing: -.01em; }
-@media (max-width: 700px) { .clients__grid { grid-template-columns: repeat(2, 1fr); } }
-/* With only a few clients, centre them instead of filling the first grid columns */
-.clients__grid--few { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(28px, 4vw, 56px) clamp(40px, 6vw, 96px); }
+/* Phones: two columns; an odd last logo gets a row of its own, centred */
+@media (max-width: 700px) {
+  .clients__grid { grid-template-columns: repeat(2, 1fr); }
+  .clients__item:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+/* Wider screens: when the logos don't fill whole rows of four, centre each row instead
+   of leaving the last one hanging on the left */
+@media (min-width: 701px) {
+  .clients__grid--centred { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(28px, 4vw, 56px) clamp(40px, 6vw, 96px); }
+}
 
 /* ============ Work ============ */
 .work {

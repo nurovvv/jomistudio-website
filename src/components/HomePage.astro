@@ -100,7 +100,7 @@ const icons = [
   <!-- CLIENTS -->
   <section class="clients wrap">
     <h2 class="clients__title" data-fade>{t.clients}</h2>
-    <div class:list={['clients__grid', { 'clients__grid--few': clients.length < 4 }]}>
+    <div class:list={['clients__grid', { 'clients__grid--centred': clients.length % 4 !== 0 }]}>
       {clients.map((c) => (
         <div class="clients__item" data-stagger>
           {c.logo

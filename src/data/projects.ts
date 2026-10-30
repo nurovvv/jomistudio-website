@@ -193,6 +193,7 @@ export const clients: { name: string; logo?: string; url?: string }[] = [
   { name: 'Bilyard', logo: '/clients/bilyard.svg' },
   { name: 'Odiliyon', logo: '/clients/odiliyon.svg', url: 'https://odiliyon.pages.dev/' },
   { name: 'Khoja Sokhtmon', logo: '/clients/khoja-sokhtmon.svg', url: 'https://khoja-sokhtmon.pages.dev/' },
+  { name: 'Zarbulmasal', logo: '/clients/zarbulmasal.webp', url: 'https://play.google.com/store/apps/details?id=com.marufi.zarbulmasal' },
 ];
 
 export type Testimonial = { name: string; role: string; text: T; color: 'mint' | 'lavender' | 'cream' };
