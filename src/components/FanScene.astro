@@ -1,0 +1,54 @@
+---
+// Three Android phones fanned out over a large faint brand motif, showing app screens
+// (store screenshots, 1:2). main.ts spreads the fan on hover (in view on touch screens)
+// and keeps switching each screen that has an `alt` version: the alt wipes in from the
+// right, the way Persian script reads, then back out. Sized in cqw of the card, like
+// the other scenes.
+export type Fan = {
+  /** Screens for the left, middle and right phone; `alt` is the same screen in another script */
+  phones: { src: string; alt?: string }[];
+  /** Large faint image behind the phones */
+  motif?: { src: string; aspect: number };
+  /** The app's status bar colour, and its text colour */
+  status?: { bg: string; ink: string };
+};
+interface Props extends Fan { color: string; ghost?: { src: string; aspect: number } }
+const { phones, motif, status, color, ghost } = Astro.props;
+
+// Rest pose for the left, middle and right phone (centre in cqw, tilt in deg, scale) and
+// how far each moves, turns and scales when the fan spreads on hover
+const poses = [
+  { cx: 25.5, cy: 81, r: -11, s: 1.05, to: { dx: -5, dy: 4, r: -16, s: 1.05 } },
+  { cx: 50, cy: 73, r: 0, s: 1.22, to: { dx: 0, dy: -3, r: 0, s: 1.26 } },
+  { cx: 74.5, cy: 81, r: 11, s: 1.05, to: { dx: 5, dy: 4, r: 16, s: 1.05 } },
+];
+const statusStyle = status ? `--status:${status.bg};--status-ink:${status.ink}` : '';
+---
+<div class="fan" style={`--bg:${color}`} data-fan>
+  {motif && <img class="fan__motif" src={motif.src} alt="" loading="lazy" decoding="async" style={`--a:${motif.aspect}`} />}
+  {ghost && <span class="ghost" style={`--m:url(${ghost.src});--a:${ghost.aspect}`}></span>}
+
+  {phones.slice(0, poses.length).map((p, i) => {
+    const o = poses[i];
+    return (
+      <div class:list={['fan__phone', { 'fan__phone--front': i === 1 }]}
+        data-dx={o.to.dx} data-dy={o.to.dy} data-r={o.to.r} data-s={o.to.s}
+        style={`--cx:${o.cx};--cy:${o.cy};--dx:0;--dy:0;--r:${o.r};--s:${o.s}`}>
+        <div class="mock__phone mock__phone--android" style={statusStyle}>
+          <div class="mock__screen">
+            <div class="mock__status" aria-hidden="true">
+              <span>9:41</span>
+              <span class="mock__icons"><i></i><i></i><i></i><i></i><b></b></span>
+            </div>
+            <div class="mock__view">
+              <img class="mock__page" src={p.src} alt="" loading="lazy" decoding="async" />
+              {p.alt && <img class="fan__alt" src={p.alt} alt="" loading="lazy" decoding="async" />}
+              {p.alt && <span class="fan__edge"></span>}
+            </div>
+            <span class="mock__island"></span>
+          </div>
+        </div>
+      </div>
+    );
+  })}
+</div>

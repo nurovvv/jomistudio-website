@@ -6,6 +6,7 @@ import DeviceMock from './DeviceMock.astro';
 import Divider from './Divider.astro';
 import LiftScene from './LiftScene.astro';
 import ScanScene from './ScanScene.astro';
+import FanScene from './FanScene.astro';
 import { ui, type Locale } from '../i18n/ui';
 import { projects, clients, testimonials, contact, showreel } from '../data/projects';
 
@@ -129,6 +130,7 @@ const icons = [
                     {p.mockup ? <DeviceMock {...p.mockup} color={p.color} ghost={p.ghost} />
                       : p.lift ? <LiftScene {...p.lift} color={p.color} ghost={p.ghost} />
                       : p.scan ? <ScanScene {...p.scan} color={p.color} ghost={p.ghost} />
+                      : p.fan ? <FanScene {...p.fan} color={p.color} ghost={p.ghost} />
                       : p.video ? <video src={p.video} autoplay muted loop playsinline></video>
                       : p.image ? <img src={p.image} alt={p.title} loading="lazy" />
                       : <div class="card__ph"><Mark ink="rgba(31,29,36,.88)" accent="#fff" /><span>{p.title}</span></div>}

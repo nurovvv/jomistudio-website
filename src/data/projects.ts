@@ -4,6 +4,7 @@
 import type { Screen } from '../components/DeviceMock.astro';
 import type { Lift } from '../components/LiftScene.astro';
 import type { Scan } from '../components/ScanScene.astro';
+import type { Fan } from '../components/FanScene.astro';
 
 type T = { en: string; ru: string; tg: string };
 
@@ -27,6 +28,8 @@ export type Project = {
   lift?: { screen: string; aspect: number; cards: Lift[]; balls?: boolean };
   /** QR table stand beside a phone showing the menu it opens (see ScanScene.astro) */
   scan?: Scan;
+  /** Fanned Android phones whose screens switch script on hover (see FanScene.astro) */
+  fan?: Fan;
   /** Brand name drawn huge and faint across the top of the card: an alpha-mask image and its width / height */
   ghost?: { src: string; aspect: number };
   /** Card background (and placeholder colour until a real image is added) */
@@ -119,6 +122,30 @@ export const projects: Project[] = [
       dishes: ['/projects/odiliyon/dish-1.webp', '/projects/odiliyon/dish-2.webp', '/projects/odiliyon/dish-3.webp'],
     },
     color: '#1F3A8A',
+  },
+  {
+    slug: 'zarbulmasal',
+    title: 'Zarbulmasal',
+    caption: {
+      en: 'Zarbulmasal, our Android app of Tajik proverbs, school poems and history, offline in two scripts',
+      ru: 'Зарбулмасал — наше Android-приложение: таджикские пословицы, школьные стихи и история, офлайн и в двух письменностях',
+      tg: 'Зарбулмасал — барномаи Android-и мо: зарбулмасалҳо, шеърҳои мактабӣ ва таърих, бе интернет ва бо ду хат',
+    },
+    url: 'https://play.google.com/store/apps/details?id=com.marufi.zarbulmasal',
+    // «Зарбулмасал» in the app's own EB Garamond, as on its store graphic
+    ghost: { src: '/projects/zarbulmasal/wordmark.png', aspect: 5.3573 },
+    // Store screenshots (Android, 1080x2160). Home and the proverb of the day switch to
+    // their Persian-script versions; the motif is the ikat diamond from the app icon.
+    fan: {
+      motif: { src: '/projects/zarbulmasal/ikat.webp', aspect: 0.9302 },
+      status: { bg: '#F2ECDE', ink: '#1D1A16' },
+      phones: [
+        { src: '/projects/zarbulmasal/home-tj.webp', alt: '/projects/zarbulmasal/home-fa.webp' },
+        { src: '/projects/zarbulmasal/proverb-tj.webp', alt: '/projects/zarbulmasal/proverb-fa.webp' },
+        { src: '/projects/zarbulmasal/poet-tj.webp' },
+      ],
+    },
+    color: '#0B1327',
   },
 ];
 

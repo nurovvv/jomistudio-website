@@ -589,9 +589,41 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
   position: absolute; left: 57cqw; top: 36cqw; width: 25cqw; aspect-ratio: 440 / 975; z-index: 3;
   translate: calc(var(--px) * 1cqw) calc(var(--py) * 1cqw); rotate: calc(var(--pr) * 1deg); scale: 1.44;
 }
-.scan .mock__phone, .card:hover .scan .mock__phone { left: 0; top: 0; rotate: none; translate: none; }
+.scan .mock__phone, .card:hover .scan .mock__phone,
+.fan .mock__phone, .card:hover .fan .mock__phone { left: 0; top: 0; rotate: none; translate: none; }
 .scan__pin { opacity: 0; }
 .scan__flash { position: absolute; inset: 0; background: #fff; opacity: 0; visibility: hidden; }
+
+/* Fan scene (FanScene.astro): three Android phones fanned over a large faint motif.
+   main.ts animates each phone's --dx/--dy/--r/--s, the motif's scale, and the script
+   wipe (each alt screen's clip-path and its edge line). */
+.fan {
+  --shade: color-mix(in srgb, var(--bg) 26%, #000); --ghost: rgba(241,231,211,.09);
+  position: absolute; inset: 0; overflow: hidden;
+  background: radial-gradient(70% 50% at 50% 56%, color-mix(in srgb, var(--bg), #fff 9%), transparent 70%), var(--bg);
+}
+.fan__motif { position: absolute; left: 0; top: calc(64cqw - 50cqw / var(--a)); width: 100cqw; opacity: .22; }
+.fan__phone {
+  position: absolute; width: 25cqw; aspect-ratio: 25 / 51.6; z-index: 1;
+  left: calc((var(--cx) - 12.5) * 1cqw); top: calc((var(--cy) - 25.8) * 1cqw);
+  translate: calc(var(--dx) * 1cqw) calc(var(--dy) * 1cqw); rotate: calc(var(--r) * 1deg); scale: var(--s);
+}
+.fan__phone--front { z-index: 2; }
+/* The second-script screen sits over the first and is revealed by a right-to-left wipe */
+.fan__alt { position: absolute; inset: 0; width: 100%; height: 100%; clip-path: inset(0% 0% 0% 100%); }
+.fan__edge {
+  position: absolute; top: 0; bottom: 0; left: 100%; width: .45cqw; translate: -50% 0;
+  background: #ED6A4E; box-shadow: 0 0 1.4cqw rgba(237,106,78,.85); opacity: 0; visibility: hidden;
+}
+
+/* Android phone: a 1:2 screen under a status bar in the app's colours, punch-hole camera */
+.mock__phone--android { aspect-ratio: 25 / 51.6; }
+.mock__phone--android .mock__status { background: var(--status, transparent); color: var(--status-ink, #f4f4f5); }
+.mock__phone--android .mock__icons b {
+  border-color: color-mix(in srgb, currentColor 50%, transparent);
+  background: linear-gradient(90deg, currentColor 0 75%, transparent 75%) content-box;
+}
+.mock__phone--android .mock__island { width: 1.5cqw; height: 1.5cqw; top: .9cqw; border-radius: 50%; }
 
 .card__caption { margin-top: 18px; font-size: clamp(14px, 1.1vw, 16px); line-height: 1.4; max-width: 420px; color: rgba(255,255,255,.88); }
 .work__more { display: flex; justify-content: center; margin-top: clamp(60px, 8vw, 110px); }

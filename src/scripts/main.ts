@@ -376,6 +376,7 @@ if (!reduced) {
   initMocks();
   initLifts();
   initScans();
+  initFans();
 
   // Work cards rise in; right column drifts for a parallax offset
   $$('.card').forEach((card) =>
@@ -660,6 +661,59 @@ function initScans() {
       rewind = gsap.to(scroll, { totalTime: 0, duration: 1.2, ease: 'expo.out' });
       bobs.forEach((b) => b.pause());
       settle = gsap.to(dishes, { '--bob': 0, duration: 0.8, ease: 'power2.out' });
+    };
+    if (finePointer) {
+      card.addEventListener('pointerenter', play);
+      card.addEventListener('pointerleave', stop);
+    } else {
+      ScrollTrigger.create({ trigger: card, start: 'top 75%', end: 'bottom 25%', onToggle: (st) => (st.isActive ? play() : stop()) });
+    }
+  });
+}
+
+/* ---------------- Project fan scenes ---------------- */
+// Hovering the card (on touch screens: having it in view) spreads the fanned phones and
+// the motif swells. Meanwhile every screen with a second-script version keeps switching:
+// the alt wipes in from the right with a coral edge, the way Persian reads, holds, then
+// wipes away the same way. On leave it all rewinds.
+function initFans() {
+  $$('[data-fan]').forEach((scene) => {
+    const card = scene.closest<HTMLElement>('.card')!;
+    const phones = $$('.fan__phone', scene);
+    const motif = scene.querySelector('.fan__motif');
+    const num = (key: string) => (_: number, el: HTMLElement) => Number(el.dataset[key]);
+
+    const tl = gsap.timeline({ paused: true });
+    tl.to(phones, { '--dx': num('dx'), '--dy': num('dy'), '--r': num('r'), '--s': num('s'), duration: 1.2, stagger: 0.06, ease: 'expo.out' }, 0);
+    if (motif) tl.to(motif, { scale: 1.08, opacity: 0.3, duration: 2.2, ease: 'power2.out' }, 0);
+
+    // One cycle per screen, a little staggered: wipe in, hold, wipe out
+    const swap = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 1 });
+    $$('.fan__alt', scene).forEach((alt, i) => {
+      const edge = alt.nextElementSibling as HTMLElement;
+      const at = i * 0.15;
+      const wipe = (start: number, clipPath: string) => swap
+        .set(edge, { left: '100%', autoAlpha: 1, immediateRender: false }, start)
+        .to(alt, { clipPath, duration: 0.9, ease: 'power2.inOut' }, start)
+        .to(edge, { left: '0%', duration: 0.9, ease: 'power2.inOut' }, start)
+        .set(edge, { autoAlpha: 0 }, start + 0.9);
+      wipe(at, 'inset(0% 0% 0% 0%)');
+      wipe(at + 2.6, 'inset(0% 100% 0% 0%)');
+      swap.set(alt, { clipPath: 'inset(0% 0% 0% 100%)' }, at + 3.5);
+    });
+
+    let begin: gsap.core.Tween | undefined;
+    let rewind: gsap.core.Tween | undefined;
+    const play = () => {
+      rewind?.kill();
+      tl.timeScale(1).play();
+      begin = gsap.delayedCall(0.5, () => swap.play());
+    };
+    const stop = () => {
+      begin?.kill();
+      tl.timeScale(1.5).reverse();
+      swap.pause();
+      rewind = gsap.to(swap, { totalTime: 0, duration: 0.6, ease: 'power2.out' });
     };
     if (finePointer) {
       card.addEventListener('pointerenter', play);
