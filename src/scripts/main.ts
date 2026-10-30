@@ -377,6 +377,7 @@ if (!reduced) {
   initLifts();
   initScans();
   initFans();
+  initFilms();
 
   // Work cards rise in; right column drifts for a parallax offset
   $$('.card').forEach((card) =>
@@ -714,6 +715,56 @@ function initFans() {
       tl.timeScale(1.5).reverse();
       swap.pause();
       rewind = gsap.to(swap, { totalTime: 0, duration: 0.6, ease: 'power2.out' });
+    };
+    if (finePointer) {
+      card.addEventListener('pointerenter', play);
+      card.addEventListener('pointerleave', stop);
+    } else {
+      ScrollTrigger.create({ trigger: card, start: 'top 75%', end: 'bottom 25%', onToggle: (st) => (st.isActive ? play() : stop()) });
+    }
+  });
+}
+
+/* ---------------- Project film cards ---------------- */
+// Cuberto-style video cards: the poster shows at rest, hovering (on touch screens: having
+// the card in view) plays the film and leaving pauses it where it is. While it plays, the
+// copy of the site's time slider follows the film's clock (see FilmScene.astro).
+function initFilms() {
+  $$('[data-film]').forEach((scene) => {
+    const card = scene.closest<HTMLElement>('.card')!;
+    const video = $<HTMLVideoElement>('video', scene);
+    const time = scene.querySelector<HTMLElement>('.film__time');
+    const clock = time && JSON.parse(scene.dataset.clock!) as { half: number; keys: [number, number][]; range: [number, number]; dusk: number; night: number };
+    // Start loading the film before the card scrolls in, so the first hover plays at once
+    ScrollTrigger.create({ trigger: card, start: 'top 150%', once: true, onEnter: () => { video.preload = 'auto'; } });
+
+    const hoursAt = (t: number) => {
+      const { half, keys } = clock!;
+      const x = (t % (2 * half)) / half;
+      const e = (1 - Math.cos(Math.PI * (x <= 1 ? x : 2 - x))) / 2;
+      const k = Math.max(1, keys.findIndex(([p]) => p >= e));
+      const [p0, h0] = keys[k - 1];
+      const [p1, h1] = keys[k];
+      return h0 + ((e - p0) / (p1 - p0)) * (h1 - h0);
+    };
+    const clockText = $('.film__clock', scene);
+    let raf = 0;
+    const tick = () => {
+      const h = hoursAt(video.currentTime);
+      const min = Math.floor(h * 60);
+      clockText.textContent = `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+      time!.style.setProperty('--k', `${((h - clock!.range[0]) / (clock!.range[1] - clock!.range[0])) * 100}%`);
+      time!.dataset.phase = h >= clock!.night ? 'night' : h >= clock!.dusk ? 'dusk' : 'day';
+      raf = requestAnimationFrame(tick);
+    };
+    const play = () => {
+      video.play().catch(() => {});
+      cancelAnimationFrame(raf);
+      if (time) raf = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      video.pause();
+      cancelAnimationFrame(raf);
     };
     if (finePointer) {
       card.addEventListener('pointerenter', play);

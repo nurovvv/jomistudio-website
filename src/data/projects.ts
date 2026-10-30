@@ -5,6 +5,7 @@ import type { Screen } from '../components/DeviceMock.astro';
 import type { Lift } from '../components/LiftScene.astro';
 import type { Scan } from '../components/ScanScene.astro';
 import type { Fan } from '../components/FanScene.astro';
+import type { Film } from '../components/FilmScene.astro';
 
 type T = { en: string; ru: string; tg: string };
 
@@ -30,8 +31,13 @@ export type Project = {
   scan?: Scan;
   /** Fanned Android phones whose screens switch script on hover (see FanScene.astro) */
   fan?: Fan;
-  /** Brand name drawn huge and faint across the top of the card: an alpha-mask image and its width / height */
-  ghost?: { src: string; aspect: number };
+  /** Video recorded from the live site, played on hover (see FilmScene.astro) */
+  film?: Film;
+  /**
+   * Brand name drawn huge and faint across the top of the card: an alpha-mask image, its
+   * width / height, and optionally how wide to draw it in % of the card (default 90)
+   */
+  ghost?: { src: string; aspect: number; width?: number };
   /** Card background (and placeholder colour until a real image is added) */
   color: string;
 };
@@ -147,6 +153,27 @@ export const projects: Project[] = [
     },
     color: '#0B1327',
   },
+  {
+    slug: 'khoja-sokhtmon',
+    title: 'Khoja Sokhtmon',
+    caption: {
+      en: '3D website for the developer Khoja Sokhtmon: turn the building, pick a floor and a flat, walk inside, switch day to night',
+      ru: '3D-сайт для застройщика «Хоча сохтмон»: дом можно вращать, выбрать этаж и квартиру, пройтись внутри и сменить день на ночь',
+      tg: 'Сайти 3D барои ширкати сохтмонии «Хоча сохтмон»: биноро гардонед, ошёна ва хонаро интихоб кунед, дарун гардиш кунед ва рӯзро ба шаб иваз кунед',
+    },
+    url: 'https://khoja-sokhtmon.pages.dev/',
+    // «Хоча сохтмон» in the site's own bold system font, stacked so it stays in the sky
+    ghost: { src: '/projects/khoja-sokhtmon/wordmark.png', aspect: 2.3986, width: 52 },
+    // Recorded from the live 3D site with its UI hidden: the camera circles the building
+    // while the site's own clock runs from 13:00 to 22:00, forward and back (13 s loop).
+    // `clock` repeats how the film was rendered so the slider copy keeps time with it.
+    film: {
+      mp4: '/projects/khoja-sokhtmon/film.mp4',
+      poster: '/projects/khoja-sokhtmon/poster.webp',
+      clock: { half: 6.5, keys: [[0, 13], [0.3, 18.25], [0.78, 20.75], [1, 22]], range: [6, 23.5], dusk: 17.75, night: 20.5 },
+    },
+    color: '#2B2A29',
+  },
 ];
 
 // Hero showreel (source project: videos/jomi-showreel, rendered at 4K and downscaled).
@@ -165,6 +192,7 @@ export const clients: { name: string; logo?: string; url?: string }[] = [
   { name: 'KIMCHI', logo: '/clients/kimchi.svg', url: 'https://kimchi-menu-dushanbe.netlify.app/' },
   { name: 'Bilyard', logo: '/clients/bilyard.svg' },
   { name: 'Odiliyon', logo: '/clients/odiliyon.svg', url: 'https://odiliyon.pages.dev/' },
+  { name: 'Khoja Sokhtmon', logo: '/clients/khoja-sokhtmon.svg', url: 'https://khoja-sokhtmon.pages.dev/' },
 ];
 
 export type Testimonial = { name: string; role: string; text: T; color: 'mint' | 'lavender' | 'cream' };
