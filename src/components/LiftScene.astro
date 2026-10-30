@@ -12,10 +12,11 @@ export type Lift = {
   /** Height above the screen at rest and when lifted, in cqw */
   z: number; up: number;
 };
-interface Props { screen: string; aspect: number; cards: Lift[]; balls?: boolean; color: string }
-const { screen, aspect, cards, balls, color } = Astro.props;
+interface Props { screen: string; aspect: number; cards: Lift[]; balls?: boolean; color: string; ghost?: { src: string; aspect: number } }
+const { screen, aspect, cards, balls, color, ghost } = Astro.props;
 ---
 <div class="lift" style={`--bg:${color}`} data-lift>
+  {ghost && <span class="ghost" style={`--m:url(${ghost.src});--a:${ghost.aspect}`}></span>}
   <div class="lift__tilt">
     <div class="lift__stage" style={`--aspect:${aspect}`}>
       <div class="lift__screen">

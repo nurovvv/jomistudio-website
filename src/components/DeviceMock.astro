@@ -17,8 +17,8 @@ export type Screen = {
   start: number;
   travel?: number;
 };
-interface Props { laptop: Screen; phone: Screen; color: string }
-const { laptop, phone, color } = Astro.props;
+interface Props { laptop: Screen; phone: Screen; color: string; ghost?: { src: string; aspect: number } }
+const { laptop, phone, color, ghost } = Astro.props;
 
 const pct = (px: number, s: Screen) => ((px / s.pageHeight) * 100).toFixed(3);
 const range = (s: Screen) => ({
@@ -32,6 +32,7 @@ const p = range(phone);
   <span class="mock__ring" style="--s:58.3"></span>
   <span class="mock__ring" style="--s:87.5"></span>
   <span class="mock__ring" style="--s:116.7"></span>
+  {ghost && <span class="ghost" style={`--m:url(${ghost.src});--a:${ghost.aspect}`}></span>}
 
   <div class="mock__laptop">
     <div class="mock__lid">

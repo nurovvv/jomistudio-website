@@ -17,8 +17,8 @@ export type Scan = {
   /** Up to three cards that float out around the phone */
   dishes: string[];
 };
-interface Props extends Scan { color: string }
-const { qr, mark, wordmark, tagline, phone, dishes, color } = Astro.props;
+interface Props extends Scan { color: string; ghost?: { src: string; aspect: number } }
+const { qr, mark, wordmark, tagline, phone, dishes, color, ghost } = Astro.props;
 
 const pct = (px: number) => ((px / phone.pageHeight) * 100).toFixed(3);
 const start = pct(phone.start);
@@ -33,7 +33,7 @@ const spots = [
 const mask = (src: string) => `--m:url(${src})`;
 ---
 <div class="scan" style={`--bg:${color}`} data-scan data-pin={phone.pin ? pct(phone.pin.at) : ''}>
-  <span class="scan__ghost" style={`${mask(wordmark.src)};--a:${wordmark.aspect}`}></span>
+  {ghost && <span class="ghost" style={`--m:url(${ghost.src});--a:${ghost.aspect}`}></span>}
 
   <div class="scan__stand">
     <div class="scan__face">

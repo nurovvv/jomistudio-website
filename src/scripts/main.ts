@@ -628,7 +628,6 @@ function initScans() {
       .to($('.scan__phone', scene), { '--pr': 1.5, '--py': -1.5, duration: 1.3, ease: 'expo.out' }, 0.85)
       .to(flash, { autoAlpha: 0.5, duration: 0.08 }, 0.95)
       .to(flash, { autoAlpha: 0, duration: 0.5, ease: 'power2.out' }, 1.03)
-      .to($('.scan__ghost', scene), { '--gx': -3, duration: 2.6, ease: 'power2.out' }, 0)
       .to(dishes, {
         '--dx': 0, '--dy': 0, '--r': (_: number, el: HTMLElement) => Number(el.dataset.r), '--s': 1,
         duration: 1.2, stagger: 0.14, ease: 'expo.out',

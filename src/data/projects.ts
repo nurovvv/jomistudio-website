@@ -27,6 +27,8 @@ export type Project = {
   lift?: { screen: string; aspect: number; cards: Lift[]; balls?: boolean };
   /** QR table stand beside a phone showing the menu it opens (see ScanScene.astro) */
   scan?: Scan;
+  /** Brand name drawn huge and faint across the top of the card: an alpha-mask image and its width / height */
+  ghost?: { src: string; aspect: number };
   /** Card background (and placeholder colour until a real image is added) */
   color: string;
 };
@@ -42,6 +44,8 @@ export const projects: Project[] = [
     },
     url: 'https://kimchi-menu-dushanbe.netlify.app/',
     image: '/projects/kimchi/cover.webp',
+    // The "KIMCHI" lettering from their own logo.svg
+    ghost: { src: '/projects/kimchi/wordmark.svg', aspect: 3.33 },
     mockup: {
       laptop: {
         page: '/projects/kimchi/desktop.webp',
@@ -72,6 +76,8 @@ export const projects: Project[] = [
       tg: 'Хазина ва ҳисоби мизҳо барои клуби билярд: вақти бозӣ, ҳисобҳо, пардохт ва ҳисоботҳо барои соҳиб',
     },
     // Internal tool, so no public link: the card leads to the contact form.
+    // «БИЛЬЯРД» in the app's own font (bold system UI font, SF Pro on Apple devices)
+    ghost: { src: '/projects/bilyard/wordmark.png', aspect: 5.3295 },
     // The tables board from the app (tablet, 2360x1640); three table cards lift off it
     lift: {
       screen: '/projects/bilyard/board.webp',
@@ -94,6 +100,7 @@ export const projects: Project[] = [
       tg: 'Менюи рақамӣ бо QR-рамз барои чойхонаи «Одилиён» дар Ваҳдат: таомҳо, нархҳо ва аксҳо бо се забон',
     },
     url: 'https://odiliyon.pages.dev/',
+    ghost: { src: '/projects/odiliyon/wordmark.png', aspect: 3.4145 },
     // Captured from the live menu at 390x844 @3x. The stand's QR code opens the real menu.
     scan: {
       qr: '/projects/odiliyon/qr.svg',

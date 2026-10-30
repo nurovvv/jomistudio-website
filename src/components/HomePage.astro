@@ -126,9 +126,9 @@ const icons = [
               >
                 <div class="card__media" style={`--c:${p.color}`}>
                   <div class="card__inner">
-                    {p.mockup ? <DeviceMock {...p.mockup} color={p.color} />
-                      : p.lift ? <LiftScene {...p.lift} color={p.color} />
-                      : p.scan ? <ScanScene {...p.scan} color={p.color} />
+                    {p.mockup ? <DeviceMock {...p.mockup} color={p.color} ghost={p.ghost} />
+                      : p.lift ? <LiftScene {...p.lift} color={p.color} ghost={p.ghost} />
+                      : p.scan ? <ScanScene {...p.scan} color={p.color} ghost={p.ghost} />
                       : p.video ? <video src={p.video} autoplay muted loop playsinline></video>
                       : p.image ? <img src={p.image} alt={p.title} loading="lazy" />
                       : <div class="card__ph"><Mark ink="rgba(31,29,36,.88)" accent="#fff" /><span>{p.title}</span></div>}

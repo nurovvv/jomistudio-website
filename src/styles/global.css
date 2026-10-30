@@ -350,6 +350,16 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
 .card__ph { width: 100%; height: 100%; display: grid; place-items: center; align-content: center; gap: 18px; color: rgba(31,29,36,.85); font-weight: 500; }
 .card__ph svg { width: 34%; transition: transform 1.2s var(--ease-out); }
 .card:hover .card__ph svg { transform: rotate(90deg); }
+/* Brand name, huge and faint, across the top of a work card, behind the scene's devices
+   (rendered by each scene from the project's `ghost`). It drifts left while hovered. */
+.ghost {
+  position: absolute; left: 5cqw; top: 4cqw; width: 90cqw; aspect-ratio: var(--a);
+  background: var(--ghost, rgba(255,255,255,.1)); pointer-events: none;
+  -webkit-mask: var(--m) center / 100% 100% no-repeat; mask: var(--m) center / 100% 100% no-repeat;
+  transition: translate 2.6s var(--ease-out);
+}
+.card:hover .ghost { translate: -3cqw 0; }
+
 /* Live device mockup (DeviceMock.astro): a laptop with a phone in front of it.
    Sized in cqw of the card so the whole scene scales with it; the design grid is
    1200x1500, so 1cqw = 12 design px. */
@@ -508,10 +518,9 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
 
 /* Scan scene (ScanScene.astro): the client's fluted wall under a warm lamp, a QR table
    stand on the left and the DeviceMock phone, enlarged, on the right. main.ts animates
-   --scan (beam), --gx (ghost wordmark), the phone's --px/--py/--pr and each dish's
-   --dx/--dy/--r/--s/--bob. */
+   --scan (beam), the phone's --px/--py/--pr and each dish's --dx/--dy/--r/--s/--bob. */
 .scan {
-  --shade: color-mix(in srgb, var(--bg) 26%, #000);
+  --shade: color-mix(in srgb, var(--bg) 26%, #000); --ghost: rgba(251,246,236,.08);
   position: absolute; inset: 0; overflow: hidden;
   background:
     radial-gradient(75% 45% at 50% 0%, rgba(230,204,150,.24), transparent 66%),
@@ -520,12 +529,8 @@ a:hover > .roll > span, a:hover > .roll::after, .roll:hover > span, .roll:hover:
     var(--bg);
 }
 /* Alpha-mask images (wordmark, tagline, QR) take the element's background colour */
-.scan__ghost, .scan__wordmark, .scan__tagline, .scan__code {
+.scan__wordmark, .scan__tagline, .scan__code {
   display: block; -webkit-mask: var(--m) center / 100% 100% no-repeat; mask: var(--m) center / 100% 100% no-repeat;
-}
-.scan__ghost {
-  position: absolute; left: 5cqw; top: 4cqw; width: 90cqw; aspect-ratio: var(--a);
-  --gx: 0; background: rgba(251,246,236,.08); translate: calc(var(--gx) * 1cqw) 0;
 }
 
 /* Table stand: a cream card in a brass frame, turned a little toward the phone */
