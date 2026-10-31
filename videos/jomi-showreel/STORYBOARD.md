@@ -1,113 +1,102 @@
 ---
 format: 1920x1080
 duration: 15s
-message: "Jomi Studio crafts premium brands and websites — shown, not told"
-arc: Mark breaks open → websites (real client) → branding → apps → 3D craft → mark reassembles (loops)
+message: "Jomi Studio ships real websites and apps for real businesses — five of them, shown, not told"
+arc: Mark breaks open → KIMCHI → Odiliyon → Bilyard → Zarbulmasal → Khoja Sokhtmon → mark reassembles (loops)
 audience: visitors landing on jomistudio.tj — prospective clients in Dushanbe and abroad
-mode: collaborative
-rhythm: drift → PUNCH → glide → pop → breathe → lockup-hold (loop)
+mode: automation
+rhythm: drift → PUNCH → pull-back → whip → roll-in → wipe → dusk → lockup-hold (loop)
 ---
 
-## Decisions
+## Decisions (v2, 2026-10-30)
 
-- **Message:** Jomi Studio crafts premium brands and websites — shown, not told. No on-screen claims; the craft is the claim.
-- **Audience and arc:** first-time visitors on the homepage hero. Mark breaks open → one scene per service (websites, branding, apps, 3D) → mark reassembles.
-- **Format:** 1920x1080, 15.0s, 30fps, silent (muted autoplay loop), no captions, no voiceover.
-- **Truthfulness:** only KIMCHI (frame 2) is a real client and real capture. Branding uses Jomi's own identity as the example; the app is an unnamed concept. No client names, logos, or claims in concept scenes.
-- **Spine:** the four Jomi brand shapes (square, rounded square r9, rounded square r16, green sphere). They are the hero prop in every frame: they break out of the mark (1), orbit the devices (2), become the identity pattern (3), the app's UI accents (4), the studio objects (5), and lock back into the mark (6).
-- **Seamless loop:** frame 6's last frame equals frame 1's first frame (assembled mark, dark stage, same camera pose) — a match cut on the mark.
-- **Centre-safe:** all focal action inside the centre 864x1080 column (x 528–1392), because the site hero crops to 4:5 on phones.
-- **Brand:** cream #F6F1E9 · ink #1F1D24 · green #4FC59A · KIMCHI red #E5161E (frame 2 only). Type: the Jomi wordmark is used as the real logo SVG (public/brand/jomi_logo_dark.svg), not retyped. Source: the user's brand files.
-- **Rendering:** one Three.js canvas (three@0.181.2, pinned), time from `hf-seek`; MeshPhysicalMaterial (clearcoat, transmission for the glass sphere) with an environment map; seeded motion only.
-- **Bans:** no on-screen marketing copy; no fake UI — the KIMCHI screens are the real captures; no Apple logo on the laptop; no neon/cyan accents; no full-screen linear gradients on dark (banding); slideshow failure (each scene a static card) and screensaver failure (motion with no intent) both avoided — every frame's motion is a camera move with a landing.
-- **Held frame:** frame 6 holds the lockup ~0.8s before the loop seam.
+- **Message:** the work itself. No on-screen copy; the only letters are the projects' own screens and wordmarks.
+- **Grammar from the reference (cuberto.com hero, measured):** one real project per ~2.4 s scene, each in its own
+  colour world, devices staged in 3D with a camera move; Jomi's v1 bookends (mark break-open, lockup) keep the loop.
+- **Truthfulness:** all five projects are real; every screen is a real capture; Khoja Sokhtmon is rendered from its
+  own live 3D engine. Zarbulmasal is Jomi's own app (Google Play, developer Jomi Studio).
+- **Format:** 1920x1080, 15.0 s, 30 fps, silent loop. Centre-safe: heroes inside x 528–1392 (the hero crops to 4:5
+  on phones).
+- **Rendering:** one Three.js canvas (three@0.181.2) for shots 0–4 and 6, time from `hf-seek`; shot 5 is a muted
+  `<video>` clip (frames baked from the live site) revealed by a clip-path wipe on the root timeline.
+- **Transitions (6 kinds, each caused on screen):** velocity cut (sphere), push into a screen / match on a screen,
+  whip tilt, object becomes the world (8-ball), wipe (the Persian script wipe crossing the frame), dusk dip into the
+  dark stage.
+- **Bans:** see SPEC.md BANNED.
 
-## Frame 1 — Break open (0.0–2.4s)
+## Frame 0 — Break open (0.0–1.2s)
 
-- scene: The assembled Jomi mark in glossy 3D on a near-black ink stage breaks apart; the four shapes drift into a slow orbit as the camera dollies in.
+- scene: The assembled Jomi mark in glossy 3D on the ink stage breaks apart; the green sphere sweeps past the lens.
+- duration: 1.2s
+- transition_in: cut (loop seam from Frame 6 — match on the mark)
+- status: animated
+- src: src/reel.js#shot0
+- rules: depth-scatter-assemble (scatter), 3d-camera-flight, ambient-glow-bloom, motion-blur-streak
+- seam_out: cut on the sphere's fastest frame
+
+## Frame 1 — KIMCHI (1.2–3.7s)
+
+- scene: Laptop + phone float in red-lit darkness; the real KIMCHI desktop and mobile sites scroll; the camera arcs
+  left→right and pushes into the laptop screen.
+- duration: 2.5s
+- transition_in: cut
+- status: animated
+- src: src/reel.js#shot1
+- blueprint: device-surface-showcase (Adapt)
+- seam_out: accelerating push into the laptop screen (blur peaks at the cut)
+
+## Frame 2 — Odiliyon (3.7–6.1s)
+
+- scene: Opens tight on a phone showing the real Odiliyon menu (match on the screen push) and pulls back to reveal a
+  cream table stand with a brass frame, the arch mark, «ОДИЛИЁН» and the real QR code, against the café's blue
+  fluted wall; an amber scan line sweeps the code; the three real dish cards fly out of the phone.
 - duration: 2.4s
-- poster: 1.4s
-- transition_in: cut (loop seam from Frame 6 — match cut on the mark)
-- status: outline
-- src: compositions/01-break-open.html
-- blueprint: compose — depth-scatter-assemble (reversed: scatter), 3d-camera-flight, depth-of-field-blur, ambient-glow-bloom
-- seam_out: cut on max velocity — the green sphere sweeps past the lens left→right (motion-blur-streak)
+- transition_in: match cut (screen → screen)
+- status: animated
+- src: src/reel.js#shot2
+- rules: multi-phase-camera (pull-back), spring-pop-entrance (dish cards), depth-of-field-blur
+- seam_out: whip tilt down (camera pitch accelerates, blur peaks at the cut)
 
-0.0–0.3s the mark sits whole (cream square, two rounded squares, green sphere), soft top key and a cool rim. 0.3–1.9s it breaks: the shapes separate along depth, each spinning slowly, clearcoat catching a moving highlight; camera dollies in and tilts 8°. Ink #1F1D24 stage with a soft green radial glow breathing behind (ambient-glow-bloom), faint fog. 1.9–2.4s the green sphere accelerates past the lens — blur peaks at the cut.
-Why: opens on the brand itself and shows it is alive and three-dimensional — sets the premium tone.
-Constraint: no text; no particle confetti.
+## Frame 3 — Bilyard (6.1–8.5s)
 
-## Frame 2 — Websites: KIMCHI (2.4–5.2s)
-
-- scene: A MacBook-style laptop and a phone float in red-lit darkness; the real KIMCHI desktop and mobile sites scroll on their screens; two brand shapes orbit as defocused satellites.
-- duration: 2.8s
-- poster: 1.4s
-- transition_in: cut
-- status: outline
-- src: compositions/02-websites.html
-- blueprint: device-surface-showcase (Adapt — floating-window push-scroll variant: held hero devices, screens scroll, continuous 3D push)
-- seam_out: cut — the camera's push accelerates into the laptop screen; blur peaks at the cut
-
-Laptop (thin black bezel, notch, silver aluminium base, no logo) centre, lid open ~105°, angled 18° to camera; phone in front-right, tilted. desktop.webp scrolls ~1300 px, mobile.webp ~1600 px, with their real header/bottom-bar strips fixed on top. KIMCHI-red #E5161E rim light from behind-left, cool fill, reflections sliding across the lid, soft red floor haze. Cream square + green sphere orbit behind, defocused (depth-of-field-blur). Camera: slow arc left→right + slight push.
-Why: proof — real client work, shown on real devices. The only real client in the reel.
-Constraint: screens show only the real captures; no invented UI; no Apple logo.
-
-## Frame 3 — Branding (5.2–7.6s)
-
-- scene: Jomi's own identity system floats in a warm cream void — business cards, a letterhead, an envelope and a round green sticker, all printed with the Jomi mark, wordmark and a pattern built from the four shapes.
+- scene: The camera arrives from above over green billiard felt: a tablet lies on it showing the real tables board;
+  three real table cards lift off the screen; the cue ball rolls into the 8-ball, which rolls into the lens.
 - duration: 2.4s
-- poster: 1.2s
-- transition_in: cut
-- status: outline
-- src: compositions/03-branding.html
-- blueprint: compose — depth-scatter-assemble (items glide into a loose stack), 3d-camera-flight (slow push + tilt), depth-of-field-blur, sine-wave-loop (idle float)
-- seam_out: cut — a business card flips toward camera, filling frame on the flip's fastest point
+- transition_in: cut (the tilt continues from Frame 2)
+- status: animated
+- src: src/reel.js#shot3
+- rules: 3d-camera-flight, orbit-3d-entry (cards lift), depth-of-field-blur
+- seam_out: object becomes the world — the black 8-ball fills the frame
 
-Paper items with real thickness and soft shadow: two business cards (one ink with a cream mark, one cream with the ink wordmark), an A4 letterhead (cream, mark top-left, a quiet four-shape pattern strip along the bottom edge), an envelope (ink, cream mark), a round sticker (green #4FC59A, cream mark). They float at different depths, slowly rotating as they glide into a loose fan; camera pushes in with a slight tilt; shallow focus on the front card. Warm cream #F6F1E9 backdrop with a soft warm shadow gradient (radial, not linear).
-Why: branding is a core service — shown on the studio's own identity, not a fake client.
-Constraint: no contact details or taglines printed; Jomi artwork only.
+## Frame 4 — Zarbulmasal (8.5–10.9s)
 
-## Frame 4 — Apps (7.6–10.0s)
-
-- scene: On a full-bleed green field, a phone with an unnamed concept app (cards, a progress ring, a button) rises and turns; three UI cards pop out of the screen and float around it.
+- scene: Out of black into the app's navy: three Android phones with the real store screens fan out over the ikat
+  diamond; the home and proverb screens wipe from Tajik to Persian right→left behind a coral edge.
 - duration: 2.4s
-- poster: 1.4s
-- transition_in: cut
-- status: outline
-- src: compositions/04-apps.html
-- blueprint: compose — spring-pop-entrance (UI cards), orbit-3d-entry, 3d-camera-flight, sine-wave-loop
-- seam_out: cut — the phone spins 90° fast; blur peaks at the cut
+- transition_in: cut from black (8-ball)
+- status: animated
+- src: src/reel.js#shot4
+- rules: orbit-3d-entry (fan), scale-swap-transition (script wipe), 3d-camera-flight
+- seam_out: the coral wipe crosses the whole frame (10.6–10.9) onto Frame 5
 
-Background green #4FC59A with a deeper green radial vignette and faint large ghost shapes (the four brand shapes at ~12% opacity, drifting). Phone (ink frame) centre, rotating from three-quarter to near-front. Screen: a concept dashboard in cream/ink/green — a greeting line, a progress ring, two cards, a pill button; no brand name. 0.6–1.4s three cards (a chart card, a toggle row, a chip group) spring out of the screen and orbit (spring-pop-entrance, staggered ≤0.4s).
-Why: UI/UX is a core service — shown as a concept, clearly not a client.
-Constraint: no product name or logo in the app; no fake metrics claims (decorative numbers only).
+## Frame 5 — Khoja Sokhtmon (10.6–13.0s)
 
-## Frame 5 — 3D & motion (10.0–12.2s)
+- scene: The live 3D site itself — the building, its floors panel, apartment panel and time slider — at sunset; the
+  site's clock runs to night and the windows light up; the camera tilts into the night sky and the UI fades.
+- duration: 2.4s (0.3s under the wipe)
+- transition_in: wipe (from Frame 4)
+- status: animated
+- src: index.html#khoja (assets/khoja/building.mp4)
+- rules: viewport-change (wipe reveal), 3d-camera-flight (baked)
+- seam_out: dusk dip — dark sky into the dark stage
 
-- scene: A bright cream studio: matte ink and cream shapes rest on a seamless cyclorama; a green glass sphere rolls into frame and refracts them.
-- duration: 2.2s
-- poster: 1.2s
-- transition_in: cut
-- status: outline
-- src: compositions/05-studio.html
-- blueprint: compose — 3d-camera-flight (slow lateral glide), depth-of-field-blur, sine-wave-loop
-- seam_out: cut — camera tilts fast down toward the sphere; blur peaks at the cut
+## Frame 6 — Lockup (13.0–15.0s)
 
-Cream #F6F1E9 cyclorama, soft overhead light, long gentle shadows. Ink square and two rounded squares in matte (high roughness) at different heights — one balanced on an edge. The green sphere is glass (transmission, IOR 1.45, tinted #4FC59A), rolling right→centre and stopping, refracting the shapes. Camera glides right→left at low height, shallow depth of field.
-Why: creative development / 3D is a service; the calm beat before the finale.
-Constraint: no text; four objects only.
-
-## Frame 6 — Lockup (12.2–15.0s)
-
-- scene: Back in the dark: the four shapes fly in from depth and lock into the Jomi mark; the "Jomi Studio" wordmark reveals beside it; the wordmark fades and the camera settles into Frame 1's opening pose.
-- duration: 2.8s
-- poster: 2.0s
-- transition_in: cut
-- status: outline
-- src: compositions/06-lockup.html
-- blueprint: logo-assemble-lockup (Adapt — elements assemble around the mark, glow bloom, wordmark reveal)
-- seam_out: loop seam — match cut on the assembled mark into Frame 1
-
-12.2–13.4s shapes fly in from four depths and snap into the 2x2 mark (depth-scatter-assemble, power4.out landings, slight spring on the sphere). 13.4–14.0s green glow blooms behind (ambient-glow-bloom); the wordmark (from the logo SVG, cream) wipes in right of the mark. 14.0–14.6s held lockup. 14.6–15.0s wordmark fades, the mark slides back to centre and the camera eases to Frame 1's exact start pose.
-Why: the brand lands; the loop restarts invisibly.
-Constraint: wordmark is the real logo artwork; no tagline, no URL.
+- scene: The four mark pieces fly in on the dark stage and lock; the wordmark reveals; hold; the lockup slides back
+  to the centred mark = Frame 0's first frame.
+- duration: 2.0s
+- transition_in: cut (dark to dark)
+- status: animated
+- src: src/reel.js#shot6
+- blueprint: logo-assemble-lockup (Adapt)
+- seam_out: loop seam (match on the mark)

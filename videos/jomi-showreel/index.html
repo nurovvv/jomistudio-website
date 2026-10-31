@@ -11,6 +11,7 @@
         }
       }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <style>
       @font-face {
         font-family: "Inter Tight";
@@ -45,14 +46,58 @@
         height: 100%;
         display: block;
       }
+      /* Shot 5: the Khoja Sokhtmon footage over the canvas, revealed by a right-to-left wipe */
+      #khoja-wrap {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+      }
+      #khoja {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+        object-fit: cover;
+      }
+      /* The coral edge of that wipe: Zarbulmasal's script-switch line, now crossing the whole frame */
+      #wipe-edge {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+      }
+      #wipe-line {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: -5px;
+        width: 10px;
+        display: block;
+        background: #ed6a4e;
+        box-shadow: 0 0 28px rgba(237, 106, 78, 0.85);
+      }
     </style>
   </head>
   <body>
-    <div data-hf-id="hf-tjw1" id="root" data-composition-id="main" data-start="0" data-duration="15" data-width="1920" data-height="1080" data-no-timeline="">
-      <!-- One WebGL canvas renders all six shots; the shot is chosen from time (CUT table in src/reel.js). -->
+    <div data-hf-id="hf-tjw1" id="root" data-composition-id="main" data-start="0" data-duration="15" data-width="1920" data-height="1080">
+      <!-- One WebGL canvas renders the mark bookends and the project shots; the shot is chosen from time (CUT table in src/reel.js). -->
       <canvas data-hf-id="hf-ny8x" id="reel-canvas" class="clip" data-start="0" data-duration="15" data-track-index="0" data-layout-allow-overflow=""></canvas>
+      <!-- Shot 5: Khoja Sokhtmon, rendered frame by frame from its live 3D site (sunset to night). -->
+      <div data-hf-id="hf-5bn1" id="khoja-wrap">
+        <video data-hf-id="hf-zkmk" id="khoja" class="clip" data-start="10.6" data-duration="2.4" data-track-index="1" muted playsinline src="assets/khoja/building.mp4"></video>
+      </div>
+      <div data-hf-id="hf-o1np" id="wipe-edge" class="clip" data-start="10.6" data-duration="0.3" data-track-index="2"><i data-hf-id="hf-l8ev" id="wipe-line"></i></div>
     </div>
 
     <script type="module" src="src/reel.js"></script>
+    <script>
+      // Zarbulmasal -> Khoja Sokhtmon: the script wipe crosses the frame right to left, the way Persian reads.
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#khoja-wrap", { clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.3, ease: "power2.inOut" }, 10.6);
+      tl.fromTo("#wipe-line", { x: 1920 }, { x: 0, duration: 0.3, ease: "power2.inOut" }, 10.6);
+      window.__timelines["main"] = tl;
+    </script>
   </body>
 </html>

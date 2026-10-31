@@ -1,5 +1,6 @@
-// Jomi Studio hero showreel — one Three.js canvas renders all six shots; every frame is a
-// pure function of HyperFrames time (hf-seek). Shot boundaries live in CUT.
+// Jomi Studio hero showreel v2 — one Three.js canvas renders the Jomi mark bookends and the project shots;
+// every frame is a pure function of HyperFrames time (hf-seek). Shot boundaries live in CUT. Shot 5 (Khoja
+// Sokhtmon) is footage baked from its live 3D site, mounted in index.html over this canvas.
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
@@ -15,8 +16,8 @@ import { JOMI_WORD_PATHS } from "./wordmark.js";
 const W = 1920;
 const H = 1080;
 const DUR = 15;
-// Shot boundaries (s): break-open · websites · branding · apps · studio · lockup
-const CUT = [0, 2.4, 5.2, 7.6, 10.0, 12.2, 15.0];
+// Shot boundaries (s): break-open · KIMCHI · Odiliyon · Bilyard · Zarbulmasal · Khoja Sokhtmon · lockup
+const CUT = [0, 1.2, 3.7, 6.1, 8.5, 10.9, 13.0, 15.0];
 const COL = { cream: 0xf6f1e9, ink: 0x1f1d24, green: 0x4fc59a, red: 0xe5161e };
 const HEX = { cream: "#F6F1E9", ink: "#1F1D24", green: "#4FC59A", muted: "#77737D" };
 // The Jomi wordmark outlines (logo units) — see wordmark.js.
@@ -313,7 +314,7 @@ function markWorld(i, cx = 0, cy = 0) {
   return v3(cx + (MARK_POS[i][0] * M) / 100, cy + (MARK_POS[i][1] * M) / 100, 0);
 }
 
-// Seamless-loop constants: Shot 6's last frame equals Shot 1's first frame.
+// Seamless-loop constants: the lockup's last frame equals the break-open's first frame.
 const P0 = v3(0, 0.12, 6.2);
 const LOOK0 = v3(0, 0, 0);
 const glowBase = (t) => 0.2 + 0.04 * Math.sin((2 * Math.PI * t) / DUR);
@@ -333,44 +334,52 @@ window.addEventListener("hf-seek", (event) => {
 async function build() {
   const loader = new THREE.ImageLoader();
   const load = (src) => new Promise((resolve, reject) => loader.load(src, resolve, undefined, reject));
-  const [deskImg, deskTop, mobImg, mobTop, mobBot] = await Promise.all([
-    load("assets/kimchi/desktop.webp"),
-    load("assets/kimchi/desktop-top.png"),
-    load("assets/kimchi/mobile.webp"),
-    load("assets/kimchi/mobile-top.png"),
-    load("assets/kimchi/mobile-bottom.png"),
-  ]);
+  const files = {
+    deskImg: "kimchi/desktop.webp", deskTop: "kimchi/desktop-top.png", mobImg: "kimchi/mobile.webp",
+    mobTop: "kimchi/mobile-top.png", mobBot: "kimchi/mobile-bottom.png",
+    menu: "odiliyon/mobile.webp", menuTop: "odiliyon/mobile-top.png", menuPin: "odiliyon/mobile-pin.png",
+    dish1: "odiliyon/dish-1.webp", dish2: "odiliyon/dish-2.webp", dish3: "odiliyon/dish-3.webp",
+    qr: "odiliyon/qr.svg", mark: "odiliyon/mark.svg", wordmark: "odiliyon/wordmark.png", tagline: "odiliyon/tagline.png",
+    board: "bilyard/board.webp", table2: "bilyard/table-2.webp", table3: "bilyard/table-3.webp", table4: "bilyard/table-4.webp",
+    homeTj: "zarbulmasal/home-tj.webp", homeFa: "zarbulmasal/home-fa.webp", proverbTj: "zarbulmasal/proverb-tj.webp",
+    proverbFa: "zarbulmasal/proverb-fa.webp", poetTj: "zarbulmasal/poet-tj.webp", ikat: "zarbulmasal/ikat.webp",
+  };
+  const img = Object.fromEntries(await Promise.all(Object.entries(files).map(async ([k, f]) => [k, await load(`assets/${f}`)])));
   await Promise.all([400, 500, 600, 700].map((w) => document.fonts.load(`${w} 40px "Inter Tight"`)));
 
+  const dark = buildDark();
+  const kimchi = buildWebsites(img.deskImg, img.deskTop, img.mobImg, img.mobTop, img.mobBot);
   SHOTS = [
-    null, // shot 1 and 6 share the dark scene
-    buildWebsites(deskImg, deskTop, mobImg, mobTop, mobBot),
-    buildBranding(),
-    buildApps(),
-    buildStudio(),
+    (lt, t) => dark.shot1(lt * 2, t), // v1's 2.4 s break-open, played in 1.2 s
+    (lt) => kimchi(lt * 1.12), // v1's 2.8 s KIMCHI shot, played in 2.5 s
+    buildOdiliyon(img),
+    buildBilyard(img),
+    buildZarbulmasal(img),
+    null, // Khoja Sokhtmon: footage in index.html covers the canvas
+    dark.shot6,
   ];
-  const darkShot = buildDark();
-  SHOTS[0] = darkShot.shot1;
-  SHOTS[5] = darkShot.shot6;
 
   // Warm up shader programs so the first sampled frame of each shot is complete.
-  for (let i = 0; i < 6; i++) {
-    const s = SHOTS[i](i === 5 ? 2.0 : 1.0, CUT[i] + 1.0);
+  SHOTS.forEach((shot, i) => {
+    if (!shot) return;
+    const mid = (CUT[i + 1] - CUT[i]) / 2;
+    const s = shot(mid, CUT[i] + mid);
     renderer.compile(s.scene, s.camera);
-  }
+  });
   ready = true;
   renderAt(window.__hfThreeTime || 0);
 }
 
 function renderAt(time) {
   const t = clamp(time, 0, DUR);
-  let i = 5;
-  for (let k = 0; k < 6; k++) {
+  let i = SHOTS.length - 1;
+  for (let k = 0; k < SHOTS.length; k++) {
     if (t >= CUT[k] && t < CUT[k + 1]) {
       i = k;
       break;
     }
   }
+  if (!SHOTS[i]) return; // footage shot: nothing to draw under it
   const s = SHOTS[i](t - CUT[i], t);
   renderPass.scene = s.scene;
   renderPass.camera = s.camera;
@@ -509,28 +518,28 @@ function buildDark() {
   }
 
   function shot6(lt, t) {
-    // Fly-in to the lockup position (mark left of centre), staggered, sphere springs last.
-    const slide = ease.inOutCubic(seg(lt, 2.4, 2.8));
+    // Fly-in to the lockup position (mark left of centre), staggered, sphere springs last (2.0 s shot).
+    const slide = ease.inOutCubic(seg(lt, 1.62, 2.0));
     const markX = lerp(LOCK_MARK_X, 0, slide);
     for (let i = 0; i < 4; i++) {
-      const d0 = i * 0.12;
-      const k = seg(lt, d0, d0 + (i === 3 ? 1.05 : 0.95));
+      const d0 = i * 0.09;
+      const k = seg(lt, d0, d0 + (i === 3 ? 0.85 : 0.75));
       const e = i === 3 ? ease.outBack(k, 1.4) : ease.outQuint(k);
       const target = markWorld(i, markX, 0);
       const p = FLY_FROM[i].p.clone().lerp(target, e);
       const r = FLY_FROM[i].r.clone().multiplyScalar(1 - Math.min(1, e));
       setPiece(i, p, r);
     }
-    const reveal = ease.outCubic(seg(lt, 1.2, 1.85));
+    const reveal = ease.outCubic(seg(lt, 0.8, 1.2));
     paintWord(reveal);
-    const fade = 1 - seg(lt, 2.35, 2.62);
+    const fade = 1 - seg(lt, 1.6, 1.85);
     wordMesh.material.opacity = (reveal > 0 ? 1 : 0) * fade;
     wordMesh.position.set(markX + WORD_DX, WORD_DY, 0.02);
-    const bloomBump = Math.sin(Math.PI * seg(lt, 1.05, 2.6));
+    const bloomBump = Math.sin(Math.PI * seg(lt, 0.75, 1.9));
     glow.material.opacity = glowBase(t) + 0.16 * bloomBump;
-    const c = ease.outCubic(seg(lt, 0, 2.0));
+    const c = ease.outCubic(seg(lt, 0, 1.5));
     aim(cam, v3(0.45, -0.18, 7.6).lerp(P0, c), LOOK0, 0.04 * (1 - c));
-    const ap = 0.0024 * (1 - ease.inOutSine(seg(lt, 0.4, 1.3)));
+    const ap = 0.0024 * (1 - ease.inOutSine(seg(lt, 0.3, 0.95)));
     return { scene, camera: cam, focus: cam.position.distanceTo(LOOK0), aperture: ap, maxblur: 0.014, bloom: 0.3 + 0.2 * bloomBump, threshold: 0.95, exposure: 0.95 };
   }
 
@@ -684,368 +693,497 @@ function buildWebsites(deskImg, deskTop, mobImg, mobTop, mobBot) {
   };
 }
 
-// ================================================================ Shot 3: branding (Jomi's own identity)
-function buildBranding() {
-  const scene = new THREE.Scene();
-  scene.background = backdropTexture("#F8F3EB", "#E3D8C7");
-  scene.environment = ENV;
-  scene.environmentIntensity = 0.55;
-  const cam = makeCamera(30);
-  const key = softKey(0xfff6ea, 2.3, v3(-3.2, 4.6, 5), 5);
-  scene.add(key, new THREE.HemisphereLight(0xffffff, 0xd8cab6, 1.1));
-  const catcher = shadowPlane(30, 20, 0.14);
-  catcher.position.z = -2.0;
-  scene.add(catcher);
 
-  function paper(w, h, d, frontCv, side, roughness = 0.85) {
-    const sideMat = new THREE.MeshStandardMaterial({ color: side, roughness });
-    const front = new THREE.MeshStandardMaterial({ map: texFrom(frontCv), roughness });
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), [sideMat, sideMat, sideMat, sideMat, front, sideMat]);
-    m.castShadow = true;
-    return m;
-  }
-  // Letterhead: logo top-left, a quiet four-shape pattern strip, a few hairlines.
-  const lh = makeCanvas(1450, 2050);
-  lh.ctx.fillStyle = "#FAF6EF";
-  lh.ctx.fillRect(0, 0, 1450, 2050);
-  drawLogo(lh.ctx, 120, 130, 150, HEX.ink, HEX.green);
-  lh.ctx.fillStyle = "rgba(31,29,36,0.14)";
-  [520, 600, 680, 760, 840, 1000, 1080, 1160].forEach((y, i) => lh.ctx.fillRect(120, y, i % 4 === 3 ? 620 : 1210, 6));
-  for (let i = 0; i < 12; i++) drawMark(lh.ctx, 120 + i * 102, 1860, 70, i % 3 === 1 ? HEX.green : HEX.ink, i % 3 === 1 ? HEX.ink : HEX.green);
-  // Envelope (ink) with cream mark.
-  const env = makeCanvas(2000, 1000);
-  env.ctx.fillStyle = HEX.ink;
-  env.ctx.fillRect(0, 0, 2000, 1000);
-  env.ctx.strokeStyle = "rgba(246,241,233,0.12)";
-  env.ctx.lineWidth = 6;
-  env.ctx.beginPath();
-  env.ctx.moveTo(0, 0);
-  env.ctx.lineTo(1000, 560);
-  env.ctx.lineTo(2000, 0);
-  env.ctx.stroke();
-  drawMark(env.ctx, 110, 110, 150, HEX.cream, HEX.green);
-  // Business cards.
-  const cardB = makeCanvas(1550, 960);
-  cardB.ctx.fillStyle = "#FAF6EF";
-  cardB.ctx.fillRect(0, 0, 1550, 960);
-  drawLogo(cardB.ctx, (1550 - 2.815 * 280) / 2, (960 - 280) / 2, 280, HEX.ink, HEX.green);
-  const cardA = makeCanvas(1550, 960);
-  cardA.ctx.fillStyle = HEX.ink;
-  cardA.ctx.fillRect(0, 0, 1550, 960);
-  drawMark(cardA.ctx, (1550 - 240) / 2, (960 - 240) / 2, 240, HEX.cream, HEX.green);
-  // Sticker (green disc, cream mark).
-  const st = makeCanvas(800, 800);
-  st.ctx.fillStyle = HEX.green;
-  st.ctx.fillRect(0, 0, 800, 800);
-  drawMark(st.ctx, 230, 230, 340, HEX.cream, HEX.cream);
-
-  const items = [
-    { m: paper(1.45, 2.05, 0.012, lh.cv, 0xf3eee6), to: v3(-1.15, 0.2, -0.9), rot: v3(0.05, 0.3, -0.08), from: v3(-0.6, 1.2, -0.6) },
-    { m: paper(2.0, 1.0, 0.03, env.cv, COL.ink, 0.7), to: v3(1.0, 0.78, -0.65), rot: v3(0.1, -0.32, 0.12), from: v3(1.0, 0.9, -0.4) },
-    { m: paper(1.55, 0.96, 0.018, cardB.cv, 0xf3eee6), to: v3(0.35, -0.5, 0.35), rot: v3(-0.14, -0.22, -0.06), from: v3(0.9, -0.8, 0.5) },
-    { m: paper(1.55, 0.96, 0.018, cardA.cv, COL.ink, 0.7), to: v3(-0.78, -0.92, 0.78), rot: v3(0.2, 0.36, 0.18), from: v3(-0.9, -1.0, 0.6) },
-  ];
-  const stickerMat = new THREE.MeshStandardMaterial({ map: texFrom(st.cv), roughness: 0.5 });
-  const stickerSide = new THREE.MeshStandardMaterial({ color: COL.green, roughness: 0.5 });
-  const sticker = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.014, 96), [stickerSide, stickerMat, stickerSide]);
-  sticker.castShadow = true;
-  items.push({ m: sticker, to: v3(1.38, -0.32, 0.9), rot: v3(Math.PI / 2 - 0.25, 0.0, -0.35), from: v3(0.8, -0.5, 0.8) });
-  items.forEach((it) => scene.add(it.m));
-
-  const LOOK = v3(0, -0.1, 0);
-  return function shot3(lt) {
-    items.forEach((it, i) => {
-      const k = ease.outCubic(seg(lt, i * 0.06, 1.6 + i * 0.06));
-      const p = it.to.clone().add(it.from.clone().multiplyScalar(0.6 * (1 - k)));
-      p.y += 0.04 * Math.sin(lt * 1.7 + i * 1.3);
-      it.m.position.copy(p);
-      it.m.rotation.set(it.rot.x + 0.35 * (1 - k) * (i % 2 ? 1 : -1), it.rot.y + 0.5 * (1 - k), it.rot.z + 0.05 * Math.sin(lt * 1.2 + i));
-    });
-    // Seam: the ink card flips toward the lens and fills the frame on the cut.
-    const flip = ease.inCubic(seg(lt, 1.95, 2.4));
-    const card = items[3].m;
-    card.position.lerp(v3(0.1, 0.05, 4.4), flip);
-    card.rotation.y += Math.PI * flip;
-    const c = ease.inOutSine(seg(lt, 0, 2.4));
-    aim(cam, v3(0.35, 0.25, 6.5).lerp(v3(-0.2, -0.05, 5.5), c), LOOK, 0.03 * c);
-    return { scene, camera: cam, focus: cam.position.distanceTo(items[2].m.position), aperture: 0.0022, maxblur: 0.012, bloom: 0.12, threshold: 0.95, exposure: 1.02, grain: 0.014, vignette: 0.35 };
+// ---------------------------------------------------------------- v2 helpers
+// Seeded PRNG (mulberry32): the same texture on every render.
+function mulberry32(a) {
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-
-// ================================================================ Shot 4: apps (unnamed concept)
-function buildApps() {
-  const scene = new THREE.Scene();
-  scene.background = backdropTexture("#63D6AC", "#37A47C");
-  scene.environment = ENV;
-  scene.environmentIntensity = 0.7;
-  const cam = makeCamera(30);
-  const key = softKey(0xffffff, 2.0, v3(-2.5, 4, 5.5), 4);
-  const rim = new THREE.DirectionalLight(0xfff4e4, 1.6);
-  rim.position.set(3, 2, -3);
-  scene.add(key, rim, new THREE.HemisphereLight(0xffffff, 0x2f8c69, 0.9));
-  const catcher = shadowPlane(30, 20, 0.16);
-  catcher.position.z = -1.6;
-  scene.add(catcher);
-
-  // Ghost brand shapes drifting in the background.
-  const ghostMat = new THREE.MeshBasicMaterial({ color: COL.cream, transparent: true, opacity: 0.13, depthWrite: false });
-  const ghosts = [
-    new THREE.Mesh(new THREE.ShapeGeometry(roundedRectShape(1, 1, 0.01), 4), ghostMat),
-    new THREE.Mesh(new THREE.ShapeGeometry(roundedRectShape(1, 1, 0.2), 16), ghostMat),
-    new THREE.Mesh(new THREE.ShapeGeometry(roundedRectShape(1, 1, 0.36), 16), ghostMat),
-    new THREE.Mesh(new THREE.CircleGeometry(0.5, 64), ghostMat),
-  ];
-  const GHOST_AT = [v3(-3.6, 1.6, -3), v3(3.4, 1.9, -3.2), v3(-3.1, -1.8, -2.8), v3(3.5, -1.5, -3)];
-  ghosts.forEach((g) => {
-    g.scale.setScalar(2.2);
-    scene.add(g);
-  });
-
-  // Concept app screen: cream UI, ink type, green accents. Progress ring counts up.
-  const app = phoneCanvas();
-  const appTex = texFrom(app.cv);
-  function paintApp(progress) {
-    phoneScreen(app.ctx, (ctx, w, h) => {
-      ctx.fillStyle = HEX.cream;
-      ctx.fillRect(0, 0, w, h);
-      statusBar(ctx, w, HEX.ink);
-      ctx.textBaseline = "alphabetic";
-      ctx.fillStyle = HEX.muted;
-      ctx.font = '500 28px "Inter Tight"';
-      ctx.fillText("Tuesday", 48, 160);
-      ctx.fillStyle = HEX.ink;
-      ctx.font = '700 64px "Inter Tight"';
-      ctx.fillText("Your day", 46, 232);
-      // ring
-      const cx = 300;
-      const cy = 480;
-      ctx.lineCap = "round";
-      ctx.lineWidth = 34;
-      ctx.strokeStyle = "#E6DED1";
-      ctx.beginPath();
-      ctx.arc(cx, cy, 150, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.strokeStyle = HEX.green;
-      ctx.beginPath();
-      ctx.arc(cx, cy, 150, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * 0.72 * progress);
-      ctx.stroke();
-      ctx.fillStyle = HEX.ink;
-      ctx.textAlign = "center";
-      ctx.font = '700 84px "Inter Tight"';
-      ctx.fillText(`${Math.round(72 * progress)}%`, cx, cy + 22);
-      ctx.fillStyle = HEX.muted;
-      ctx.font = '500 26px "Inter Tight"';
-      ctx.fillText("Daily focus", cx, cy + 66);
-      ctx.textAlign = "left";
-      // cards
-      [
-        { y: 690, title: "Deep work", sub: "2h 40m", icon: "circle" },
-        { y: 862, title: "Reading", sub: "24 pages", icon: "square" },
-      ].forEach((c) => {
-        ctx.fillStyle = "#FFFFFF";
-        rr(ctx, 40, c.y, 520, 150, 36);
-        ctx.fill();
-        ctx.fillStyle = c.icon === "circle" ? HEX.green : HEX.ink;
-        if (c.icon === "circle") {
-          ctx.beginPath();
-          ctx.arc(110, c.y + 75, 32, 0, Math.PI * 2);
-          ctx.fill();
-        } else {
-          rr(ctx, 78, c.y + 43, 64, 64, 14);
-          ctx.fill();
-        }
-        ctx.fillStyle = HEX.ink;
-        ctx.font = '600 34px "Inter Tight"';
-        ctx.fillText(c.title, 172, c.y + 68);
-        ctx.fillStyle = HEX.muted;
-        ctx.font = '500 26px "Inter Tight"';
-        ctx.fillText(c.sub, 172, c.y + 108);
-      });
-      // button
-      ctx.fillStyle = HEX.ink;
-      rr(ctx, 40, 1046, 520, 104, 52);
-      ctx.fill();
-      ctx.fillStyle = HEX.cream;
-      ctx.textAlign = "center";
-      ctx.font = '600 36px "Inter Tight"';
-      ctx.fillText("Start session", 300, 1110);
-      ctx.textAlign = "left";
-      // tab bar: the four brand shapes as icons
-      const icons = [
-        (x) => rr(ctx, x, 1196, 40, 40, 0),
-        (x) => rr(ctx, x, 1196, 40, 40, 9),
-        (x) => rr(ctx, x, 1196, 40, 40, 15),
-        (x) => {
-          ctx.beginPath();
-          ctx.arc(x + 20, 1216, 20, 0, Math.PI * 2);
-        },
-      ];
-      icons.forEach((draw, i) => {
-        ctx.fillStyle = i === 3 ? HEX.green : "rgba(31,29,36,0.35)";
-        draw(110 + i * 115);
-        ctx.fill();
-      });
-    });
-    appTex.needsUpdate = true;
-  }
-
-  const phone = makePhone(physical(COL.ink, { roughness: 0.22, metalness: 0.4, clearcoat: 1 }), appTex);
-  scene.add(phone);
-
-  // Floating UI cards (transparent canvases with soft shadows drawn in).
-  function cardCanvas(w, h, paint) {
-    const S = 1.6; // backing-store scale
-    const { cv, ctx } = makeCanvas(Math.round(w * S), Math.round(h * S));
-    ctx.scale(S, S);
-    ctx.shadowColor = "rgba(20,40,30,0.25)";
-    ctx.shadowBlur = 30;
-    ctx.shadowOffsetY = 12;
-    ctx.fillStyle = "#FFFFFF";
-    rr(ctx, 24, 18, w - 48, h - 54, 34);
-    ctx.fill();
-    ctx.shadowColor = "transparent";
-    paint(ctx, w, h);
-    return cv;
-  }
-  const chart = cardCanvas(560, 380, (ctx) => {
-    ctx.fillStyle = HEX.ink;
-    ctx.font = '600 30px "Inter Tight"';
-    ctx.fillText("This week", 58, 82);
-    [0.45, 0.7, 0.55, 0.9, 0.62, 0.8, 0.5].forEach((v, i) => {
-      ctx.fillStyle = i === 3 ? HEX.green : "#E6DED1";
-      const bh = 180 * v;
-      rr(ctx, 60 + i * 64, 300 - bh, 40, bh, 12);
-      ctx.fill();
-    });
-  });
-  const toggle = cardCanvas(560, 190, (ctx) => {
-    ctx.fillStyle = HEX.ink;
-    ctx.font = '600 32px "Inter Tight"';
-    ctx.fillText("Reminders", 60, 100);
-    ctx.fillStyle = HEX.green;
-    rr(ctx, 400, 62, 100, 56, 28);
-    ctx.fill();
-    ctx.fillStyle = "#FFFFFF";
-    ctx.beginPath();
-    ctx.arc(472, 90, 22, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  const chips = cardCanvas(600, 190, (ctx) => {
-    ctx.font = '600 28px "Inter Tight"';
-    [
-      ["Calm", 58, false],
-      ["Focus", 218, true],
-      ["Energy", 392, false],
-    ].forEach(([label, x, on]) => {
-      ctx.fillStyle = on ? HEX.green : "#EFE9DF";
-      rr(ctx, x, 58, label.length * 19 + 52, 62, 31);
-      ctx.fill();
-      ctx.fillStyle = on ? "#FFFFFF" : HEX.ink;
-      ctx.fillText(label, x + 26, 100);
-    });
-  });
-  const cards = [
-    { cv: chart, w: 1.12, to: v3(-1.05, 0.6, 0.45), ry: 0.25 },
-    { cv: toggle, w: 1.12, to: v3(1.0, 0.2, 0.65), ry: -0.28 },
-    { cv: chips, w: 1.2, to: v3(-0.92, -0.72, 0.85), ry: 0.22 },
-  ].map((c) => {
-    const m = new THREE.Mesh(
-      new THREE.PlaneGeometry(c.w, (c.w * c.cv.height) / c.cv.width),
-      new THREE.MeshBasicMaterial({ map: texFrom(c.cv), transparent: true, toneMapped: false, depthWrite: false }),
-    );
-    scene.add(m);
-    return { ...c, m };
-  });
-
-  const LOOK = v3(0, 0, 0);
-  return function shot4(lt) {
-    paintApp(ease.outCubic(seg(lt, 0.2, 1.6)));
-    const turn = ease.outCubic(seg(lt, 0, 1.8));
-    const spin = ease.inCubic(seg(lt, 2.0, 2.4));
-    phone.rotation.set(-0.05 + 0.04 * Math.sin(lt * 1.3), lerp(-0.75, -0.12, turn) + 1.7 * spin, 0.03);
-    phone.position.set(0, lerp(-0.35, 0, turn) + 0.03 * Math.sin(lt * 1.7), 0);
-    cards.forEach((c, i) => {
-      const k = seg(lt, 0.55 + i * 0.14, 1.3 + i * 0.14);
-      const e = ease.outBack(k, 1.5);
-      const p = v3(0, 0, 0.06).lerp(c.to, e);
-      p.y += 0.04 * Math.sin(lt * 1.6 + i * 2.1) * k;
-      p.multiplyScalar(1 + 0.6 * spin);
-      c.m.position.copy(p);
-      c.m.scale.setScalar(Math.max(0.001, lerp(0.15, 1, clamp(e, 0, 1.2))));
-      c.m.rotation.set(0, c.ry * k, 0);
-      c.m.visible = lt >= 0.55 + i * 0.14;
-    });
-    ghosts.forEach((g, i) => {
-      g.position.copy(GHOST_AT[i]).add(v3(0.15 * Math.sin(lt * 0.8 + i), 0.12 * Math.cos(lt * 0.7 + i * 2), 0));
-      g.rotation.z = 0.2 * Math.sin(lt * 0.5 + i) + i * 0.3;
-    });
-    const c = ease.inOutSine(seg(lt, 0, 2.4));
-    aim(cam, v3(0.3, 0.28, 5.7).lerp(v3(-0.1, 0.06, 5.0), c), LOOK);
-    return { scene, camera: cam, focus: cam.position.length(), aperture: 0.0016, maxblur: 0.01, bloom: 0.12, threshold: 0.96, exposure: 1.0, grain: 0.014, vignette: 0.4 };
-  };
+// An alpha-mask image (wordmark, tagline, QR code) drawn in one colour at w x h.
+function tinted(img, color, w, h) {
+  const { cv, ctx } = makeCanvas(Math.round(w), Math.round(h));
+  ctx.drawImage(img, 0, 0, cv.width, cv.height);
+  ctx.globalCompositeOperation = "source-in";
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  return cv;
 }
-
-// ================================================================ Shot 5: studio (3D & motion)
-function buildStudio() {
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xece3d5);
-  scene.fog = new THREE.Fog(0xece3d5, 7, 16);
-  scene.environment = ENV;
-  scene.environmentIntensity = 0.65;
-  const cam = makeCamera(30);
-  const key = softKey(0xfff1de, 2.4, v3(-3.2, 6, 3.2), 4);
-  scene.add(key, new THREE.HemisphereLight(0xfff8ee, 0xdccdb6, 0.85));
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshStandardMaterial({ color: 0xede4d6, roughness: 0.95 }));
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  scene.add(floor);
-
-  const S = 0.9;
-  const inkMatte = new THREE.MeshStandardMaterial({ color: COL.ink, roughness: 0.72 });
-  const creamMatte = new THREE.MeshStandardMaterial({ color: 0xfbf7f0, roughness: 0.55 });
-  const square = new THREE.Mesh(GEO.sq, inkMatte);
-  square.scale.setScalar(S);
-  square.position.set(-1.1, 0.5 * S, -0.4);
-  square.rotation.y = 0.5;
-  const r9 = new THREE.Mesh(GEO.r9, creamMatte);
-  r9.scale.setScalar(S);
-  r9.position.set(-0.15, 0.43, -1.05);
-  r9.rotation.set(-0.12, -0.35, 0.08);
-  const r16 = new THREE.Mesh(GEO.r16, inkMatte);
-  r16.scale.setScalar(S);
-  r16.rotation.set(-Math.PI / 2, 0, 0.4);
-  r16.position.set(1.45, 0.135, -0.55);
-  const glass = new THREE.Mesh(
-    GEO.ball,
-    new THREE.MeshPhysicalMaterial({
-      color: 0xbff0db,
-      transmission: 1,
-      thickness: 0.9,
-      ior: 1.45,
-      roughness: 0.03,
-      attenuationColor: new THREE.Color(COL.green),
-      attenuationDistance: 0.8,
-      clearcoat: 1,
-      specularIntensity: 1,
-    }),
+// An image with rounded corners (transparent outside), radius in source px.
+function rounded(img, r) {
+  const { cv, ctx } = makeCanvas(img.width, img.height);
+  rr(ctx, 0, 0, img.width, img.height, r);
+  ctx.clip();
+  ctx.drawImage(img, 0, 0);
+  return cv;
+}
+// A flat card w world units wide that casts a cut-out shadow (alpha-tested).
+function cardMesh(source, w) {
+  const h = (w * source.height) / source.width;
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(w, h),
+    new THREE.MeshStandardMaterial({ map: texFrom(source), alphaTest: 0.5, roughness: 0.55, side: THREE.DoubleSide }),
   );
-  glass.scale.setScalar(S);
-  [square, r9, r16, glass].forEach((m) => {
-    m.castShadow = true;
-    scene.add(m);
-  });
-  const RADIUS = 0.5 * S;
+  m.castShadow = true;
+  return m;
+}
+// Android screen frame: like phoneScreen, with a punch-hole camera instead of the island.
+function androidScreen(ctx, paint) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.setTransform(PHONE_S, 0, 0, PHONE_S, 0, 0);
+  ctx.save();
+  rr(ctx, 0, 0, PHONE_W, PHONE_H, 70);
+  ctx.clip();
+  paint(ctx, PHONE_W, PHONE_H);
+  ctx.fillStyle = "#000";
+  ctx.beginPath();
+  ctx.arc(PHONE_W / 2, 46, 17, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
 
-  return function shot5(lt) {
-    const roll = ease.outCubic(seg(lt, 0, 1.6));
-    const x = lerp(3.0, 0.62, roll);
-    glass.position.set(x, RADIUS, 0.3);
-    glass.rotation.set(0, 0, -(x - 3.0) / RADIUS);
-    const c = ease.inOutSine(seg(lt, 0, 2.2));
-    const tilt = ease.inCubic(seg(lt, 1.85, 2.2));
-    const pos = v3(2.2, 0.78, 5.7).lerp(v3(0.55, 0.66, 5.0), c).lerp(v3(0.7, 1.05, 3.3), tilt);
-    const look = v3(0.35, 0.38, -0.3).lerp(v3(0.15, 0.4, -0.3), c).lerp(v3(0.6, 0.25, 0.3), tilt);
+// ================================================================ Shot 2: Odiliyon (QR menu, real captures)
+function buildOdiliyon(img) {
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x1f3a8a);
+  scene.environment = ENV;
+  scene.environmentIntensity = 0.5;
+  const cam = makeCamera(30);
+
+  // The café's wall: blue with vertical flutes, a warm lamp pool from above, darker toward the edges.
+  const wall = makeCanvas(2048, 1152);
+  {
+    const { ctx } = wall;
+    ctx.fillStyle = "#1F3A8A";
+    ctx.fillRect(0, 0, 2048, 1152);
+    for (let x = 0; x < 2048; x += 12) {
+      ctx.fillStyle = "rgba(0,0,0,0.18)";
+      ctx.fillRect(x, 0, 2, 1152);
+      ctx.fillStyle = "rgba(255,255,255,0.06)";
+      ctx.fillRect(x + 2, 0, 2, 1152);
+    }
+    const lamp = ctx.createRadialGradient(1024, -80, 40, 1024, -80, 1150);
+    lamp.addColorStop(0, "rgba(230,204,150,0.42)");
+    lamp.addColorStop(1, "rgba(230,204,150,0)");
+    ctx.fillStyle = lamp;
+    ctx.fillRect(0, 0, 2048, 1152);
+    const edge = ctx.createRadialGradient(1024, 560, 380, 1024, 560, 1350);
+    edge.addColorStop(0, "rgba(6,12,40,0)");
+    edge.addColorStop(1, "rgba(6,12,40,0.6)");
+    ctx.fillStyle = edge;
+    ctx.fillRect(0, 0, 2048, 1152);
+  }
+  const wallMesh = new THREE.Mesh(new THREE.PlaneGeometry(18, 10.125), new THREE.MeshBasicMaterial({ map: texFrom(wall.cv), toneMapped: false }));
+  wallMesh.position.set(0, 2.2, -3.5);
+  scene.add(wallMesh);
+  // Dark walnut table top
+  const table = new THREE.Mesh(new THREE.PlaneGeometry(24, 12), physical(0x2a1e16, { roughness: 0.4, clearcoat: 0.35, clearcoatRoughness: 0.25 }));
+  table.rotation.x = -Math.PI / 2;
+  table.position.set(0, -1.05, 1.5);
+  table.receiveShadow = true;
+  scene.add(table);
+
+  const key = softKey(0xfff0dc, 2.4, v3(-3, 5, 4), 4);
+  const amber = new THREE.PointLight(0xe8a33a, 5, 7, 1.6);
+  amber.position.set(2.6, 0.9, 1.2);
+  scene.add(key, amber, new THREE.HemisphereLight(0xdde4ff, 0x2a1e16, 0.7));
+
+  // ---- table stand: cream face in a brass frame, the arch mark, wordmark, tagline and the real QR code
+  const F = { w: 1150, h: 1600 };
+  const face = makeCanvas(F.w, F.h);
+  const QR = { size: 600, y: 690 };
+  {
+    const { ctx } = face;
+    ctx.fillStyle = "#F5F1E8";
+    ctx.fillRect(0, 0, F.w, F.h);
+    const gloss = ctx.createLinearGradient(0, 0, F.w * 0.6, F.h * 0.5);
+    gloss.addColorStop(0, "rgba(255,255,255,0.55)");
+    gloss.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = gloss;
+    ctx.fillRect(0, 0, F.w, F.h);
+    ctx.strokeStyle = "#B49969";
+    ctx.lineWidth = 14;
+    rr(ctx, 24, 24, F.w - 48, F.h - 48, 46);
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(180,153,105,0.55)";
+    ctx.lineWidth = 4;
+    rr(ctx, 48, 48, F.w - 96, F.h - 96, 30);
+    ctx.stroke();
+    ctx.drawImage(img.mark, F.w / 2 - 44, 110, 88, 110);
+    const wmW = 780;
+    const wmH = wmW / 3.4145;
+    ctx.drawImage(tinted(img.wordmark, "#1F3A8A", wmW, wmH), (F.w - wmW) / 2, 250);
+    const tgW = 470;
+    const tgH = tgW / 8.3962;
+    ctx.drawImage(tinted(img.tagline, "rgba(31,58,138,0.72)", tgW, tgH), (F.w - tgW) / 2, 250 + wmH + 18);
+    const qx = (F.w - QR.size) / 2;
+    ctx.drawImage(tinted(img.qr, "#16296A", QR.size, QR.size), qx, QR.y);
+    ctx.strokeStyle = "#B49969";
+    ctx.lineWidth = 14;
+    ctx.lineCap = "round";
+    const o = 42;
+    const L = 110;
+    [
+      [qx - o, QR.y - o, 1, 1],
+      [qx + QR.size + o, QR.y - o, -1, 1],
+      [qx - o, QR.y + QR.size + o, 1, -1],
+      [qx + QR.size + o, QR.y + QR.size + o, -1, -1],
+    ].forEach(([x, y, dx, dy]) => {
+      ctx.beginPath();
+      ctx.moveTo(x, y + dy * L);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x + dx * L, y);
+      ctx.stroke();
+    });
+  }
+  const S = { w: 1.15, h: 1.6, d: 0.045 };
+  const creamSide = new THREE.MeshStandardMaterial({ color: 0xf1ebe0, roughness: 0.4 });
+  const front = new THREE.MeshPhysicalMaterial({ map: texFrom(face.cv), roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.08 });
+  const panel = new THREE.Mesh(new THREE.BoxGeometry(S.w, S.h, S.d), [creamSide, creamSide, creamSide, creamSide, front, creamSide]);
+  panel.castShadow = true;
+  panel.position.y = S.h / 2;
+  const lean = new THREE.Group(); // leans the face back from its foot
+  lean.position.y = 0.07;
+  lean.rotation.x = -0.1;
+  lean.add(panel);
+  const base = new THREE.Mesh(new RoundedBoxGeometry(0.82, 0.09, 0.34, 3, 0.03), physical(0xb49969, { metalness: 1, roughness: 0.35 }));
+  base.position.y = 0.045;
+  base.castShadow = true;
+  const stand = new THREE.Group();
+  stand.add(lean, base);
+  stand.position.set(-0.8, -1.05, -0.35);
+  stand.rotation.y = 0.38;
+  scene.add(stand);
+
+  // Scan light: an amber band with a bright lower edge, swept down the QR code
+  const beamCv = makeCanvas(64, 256);
+  {
+    const g = beamCv.ctx.createLinearGradient(0, 0, 0, 256);
+    g.addColorStop(0, "rgba(232,163,58,0)");
+    g.addColorStop(0.8, "rgba(232,163,58,0.35)");
+    g.addColorStop(0.97, "rgba(255,215,140,1)");
+    g.addColorStop(1, "rgba(255,215,140,0)");
+    beamCv.ctx.fillStyle = g;
+    beamCv.ctx.fillRect(0, 0, 64, 256);
+  }
+  const beam = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.74, 0.16),
+    new THREE.MeshBasicMaterial({ map: texFrom(beamCv.cv), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, opacity: 0 }),
+  );
+  beam.position.z = S.d / 2 + 0.004;
+  panel.add(beam);
+  const qrTop = (0.5 - QR.y / F.h) * S.h;
+  const qrBottom = (0.5 - (QR.y + QR.size) / F.h) * S.h;
+
+  // ---- phone with the real menu
+  const mob = phoneCanvas();
+  const mobTex = texFrom(mob.cv);
+  const phone = makePhone(physical(0x1c1d22, { metalness: 0.85, roughness: 0.3, clearcoat: 0.6 }), mobTex);
+  const PHONE_AT = v3(0.62, -0.12, 0.45);
+  phone.position.copy(PHONE_AT);
+  phone.rotation.set(-0.04, -0.34, 0.05);
+  scene.add(phone);
+  function paintMenu(scrollCss) {
+    phoneScreen(mob.ctx, (ctx, w, h) => {
+      ctx.fillStyle = "#F2ECE0";
+      ctx.fillRect(0, 0, w, h);
+      const k = 3; // source px per CSS px (390 CSS px -> 1170 px)
+      const top = 92;
+      const scale = 600 / 390;
+      const viewCss = (h - top) / scale;
+      ctx.drawImage(img.menu, 0, scrollCss * k, 390 * k, viewCss * k, 0, top, 600, h - top);
+      // The site's pinned bars: header alone, header + category bar once the menu has scrolled past it
+      const strip = scrollCss >= 628 ? img.menuPin : img.menuTop;
+      ctx.drawImage(strip, 0, top, 600, (strip.height / k) * scale);
+      ctx.fillStyle = "#1F3A8A";
+      ctx.fillRect(0, 0, w, top);
+      statusBar(ctx, w, "#FBF6EC");
+    });
+    mobTex.needsUpdate = true;
+  }
+
+  // ---- the three «Попробуйте» dish cards, flying out of the phone
+  const dishes = [img.dish1, img.dish2, img.dish3].map((d) => cardMesh(rounded(d, 30), 0.56));
+  dishes.forEach((m) => scene.add(m));
+  const DISH_TO = [
+    { p: v3(0.0, 0.42, 0.95), r: v3(0.05, -0.15, 0.17) },
+    { p: v3(1.55, 0.2, 0.15), r: v3(0, -0.5, -0.14) },
+    { p: v3(1.28, -0.72, 1.15), r: v3(-0.15, -0.3, 0.08) },
+  ];
+  const phoneFwd = v3(0, 0, 1).applyEuler(phone.rotation);
+  const CLOSE = PHONE_AT.clone().add(phoneFwd.clone().multiplyScalar(2.3));
+  const WIDE = v3(0.8, 0.42, 4.75);
+
+  return function shot2(lt) {
+    paintMenu(lerp(0, 1150, ease.inOutSine(seg(lt, 0.15, 2.4))));
+    phone.position.y = PHONE_AT.y + 0.03 * Math.sin(lt * 1.8);
+    const sk = seg(lt, 0.6, 1.3);
+    beam.position.y = lerp(qrTop + 0.02, qrBottom - 0.02, ease.inOutSine(sk));
+    beam.material.opacity = Math.sin(Math.PI * sk);
+    dishes.forEach((m, i) => {
+      const k = seg(lt, 1.0 + i * 0.1, 1.65 + i * 0.1);
+      const e = ease.outBack(k, 1.3);
+      const p = PHONE_AT.clone().add(v3(0, 0.1, 0.05)).lerp(DISH_TO[i].p, e);
+      p.y += 0.03 * Math.sin(lt * 1.7 + i * 1.9) * k;
+      m.position.copy(p);
+      m.rotation.set(DISH_TO[i].r.x * e, lerp(-0.34, DISH_TO[i].r.y, e), DISH_TO[i].r.z * e);
+      m.scale.setScalar(Math.max(0.001, lerp(0.2, 1, clamp(e, 0, 1.2))));
+      m.visible = k > 0;
+    });
+    // Camera: tight on the phone's screen (the match from the KIMCHI push), pulls back to the stand,
+    // drifts, then whips down into the cut.
+    const pull = ease.outQuint(seg(lt, 0, 1.3));
+    const drift = ease.inOutSine(seg(lt, 1.3, 2.4));
+    const pos = CLOSE.clone().lerp(WIDE, pull).add(v3(-0.3 * drift, -0.05 * drift, -0.2 * drift));
+    const look = PHONE_AT.clone().lerp(v3(0.1, -0.22, 0), pull);
+    const whip = ease.inCubic(seg(lt, 2.05, 2.4));
+    look.y -= 2.6 * whip;
+    look.z += 0.8 * whip;
     aim(cam, pos, look);
-    return { scene, camera: cam, focus: cam.position.distanceTo(glass.position), aperture: 0.0026, maxblur: 0.012, bloom: 0.1, threshold: 0.97, exposure: 0.98, grain: 0.012, vignette: 0.32 };
+    const focus = lerp(cam.position.distanceTo(PHONE_AT), cam.position.distanceTo(v3(-0.1, -0.2, 0.1)), pull);
+    return { scene, camera: cam, focus, aperture: 0.0008 + 0.0028 * whip, maxblur: 0.012, bloom: 0.18, threshold: 0.95, exposure: 1.0, grain: 0.015, vignette: 0.42 };
+  };
+}
+
+// ================================================================ Shot 3: Bilyard (cash-desk app, real captures)
+function buildBilyard(img) {
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0c2a1f);
+  scene.environment = ENV;
+  scene.environmentIntensity = 0.45;
+  const cam = makeCamera(32);
+  cam.near = 0.02; // the final dolly ends a few cm from the 8-ball
+  cam.updateProjectionMatrix();
+
+  // Felt: billiard green with seeded fibre noise, a lamp pool in the middle, darker toward the rails
+  const felt = makeCanvas(2048, 2048);
+  {
+    const { ctx } = felt;
+    const g = ctx.createRadialGradient(1024, 1024, 100, 1024, 1024, 1300);
+    g.addColorStop(0, "#2A8A5C");
+    g.addColorStop(0.45, "#1F7049");
+    g.addColorStop(1, "#0F3D2E");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 2048, 2048);
+    const rnd = mulberry32(7);
+    for (let i = 0; i < 90000; i++) {
+      ctx.fillStyle = rnd() < 0.5 ? "rgba(0,0,0,0.07)" : "rgba(255,255,255,0.035)";
+      ctx.fillRect(rnd() * 2048, rnd() * 2048, 2, 2);
+    }
+  }
+  const feltMesh = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), new THREE.MeshStandardMaterial({ map: texFrom(felt.cv), roughness: 0.95 }));
+  feltMesh.rotation.x = -Math.PI / 2;
+  feltMesh.receiveShadow = true;
+  scene.add(feltMesh);
+
+  const lamp = new THREE.SpotLight(0xfff1dc, 3.2, 0, 0.62, 0.65, 0);
+  lamp.position.set(0.5, 6.2, 1.0);
+  lamp.target.position.set(0.4, 0, 0.5);
+  lamp.castShadow = true;
+  lamp.shadow.mapSize.set(2048, 2048);
+  lamp.shadow.radius = 6;
+  lamp.shadow.bias = -0.0003;
+  scene.add(lamp, lamp.target, new THREE.HemisphereLight(0xcfe9dc, 0x0b2a1f, 0.6));
+
+  // ---- tablet lying on the felt, the real tables board on its screen; three cards have lifted off it
+  const SW = 2.36;
+  const SH = SW / (2360 / 1640);
+  const LIFT = [
+    { src: img.table4, x: 0.0114, y: 0.5744, up: 0.36 },
+    { src: img.table2, x: 0.3403, y: 0.1439, up: 0.52 },
+    { src: img.table3, x: 0.6691, y: 0.1439, up: 0.7 },
+  ];
+  const CW = 0.3195;
+  const CH = 0.4177;
+  const scr = makeCanvas(2360, 1640);
+  scr.ctx.drawImage(img.board, 0, 0);
+  LIFT.forEach((c) => {
+    scr.ctx.fillStyle = "#E8E7E3";
+    rr(scr.ctx, c.x * 2360, c.y * 1640, CW * 2360, CH * 1640, 42);
+    scr.ctx.fill();
+  });
+  const tablet = new THREE.Group();
+  const body = new THREE.Mesh(new RoundedBoxGeometry(SW + 0.18, 0.07, SH + 0.18, 4, 0.05), physical(0x111113, { roughness: 0.3, metalness: 0.5, clearcoat: 0.6 }));
+  body.position.y = 0.035;
+  body.castShadow = true;
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(SW, SH), new THREE.MeshBasicMaterial({ map: texFrom(scr.cv), toneMapped: false }));
+  screen.rotation.x = -Math.PI / 2;
+  screen.position.y = 0.0705;
+  const catcher = shadowPlane(SW, SH, 0.38); // the lifted cards' shadows on the screen
+  catcher.rotation.x = -Math.PI / 2;
+  catcher.position.y = 0.0712;
+  tablet.add(body, screen, catcher);
+  tablet.rotation.y = -0.12;
+  scene.add(tablet);
+  const cards = LIFT.map((c) => {
+    const m = cardMesh(c.src, CW * SW);
+    m.rotation.x = -Math.PI / 2;
+    tablet.add(m);
+    return { ...c, m, cx: (c.x + CW / 2 - 0.5) * SW, cz: (c.y + CH / 2 - 0.5) * SH };
+  });
+
+  // ---- billiard balls: the cue ball runs into the 8-ball, which rolls toward the lens
+  const R = 0.11;
+  const eightCv = makeCanvas(1024, 512);
+  {
+    const { ctx } = eightCv;
+    ctx.fillStyle = "#0b0b0d";
+    ctx.fillRect(0, 0, 1024, 512);
+    ctx.fillStyle = "#F6F4EE";
+    ctx.beginPath();
+    ctx.arc(256, 256, 78, 0, Math.PI * 2); // u = 0.25 faces +z
+    ctx.fill();
+    ctx.fillStyle = "#111";
+    ctx.font = '700 96px "Inter Tight"';
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("8", 256, 262);
+  }
+  const ballGeo = new THREE.SphereGeometry(R, 64, 48);
+  const cue = new THREE.Mesh(ballGeo, physical(0xf4f1ea, { roughness: 0.12, clearcoat: 1 }));
+  const eight = new THREE.Mesh(ballGeo, new THREE.MeshPhysicalMaterial({ map: texFrom(eightCv.cv), roughness: 0.12, clearcoat: 1 }));
+  cue.castShadow = true;
+  eight.castShadow = true;
+  scene.add(cue, eight);
+  const BX = 1.75;
+  const EIGHT_Z = 1.35;
+  const CUE_FROM = -0.35;
+  const HIT = 1.45;
+
+  return function shot3(lt) {
+    cards.forEach((c, i) => {
+      const k = seg(lt, 0.35 + i * 0.12, 1.15 + i * 0.12);
+      const e = ease.outBack(k, 1.4);
+      c.m.position.set(c.cx, 0.074 + c.up * e + 0.02 * Math.sin(lt * 1.6 + i * 2) * k, c.cz);
+      c.m.rotation.set(-Math.PI / 2 + 0.08 * e * (i % 2 ? 1 : -1), 0, 0.05 * e * (i - 1));
+    });
+    // Cue ball rolls in (+z) and stops dead on the 8-ball; the 8-ball carries on, slowing
+    const ck = seg(lt, 0.7, HIT);
+    const cz = lerp(CUE_FROM, EIGHT_Z - 2 * R, ease.inQuad(ck));
+    cue.position.set(BX, R, cz);
+    cue.rotation.set((cz - CUE_FROM) / R, 0, 0);
+    const ek = seg(lt, HIT, 2.4);
+    const ez = lerp(EIGHT_Z, 2.5, ease.outCubic(ek));
+    eight.position.set(BX, R, ez);
+    eight.rotation.set((ez - EIGHT_Z) / R, 0, 0);
+    // Camera: from overhead (the tilt carried over from Odiliyon) down to a three-quarter view, then a dolly
+    // to the 8-ball until its black fills the frame
+    const a = ease.inOutSine(seg(lt, 0, 1.25));
+    const pos = v3(0.15, 6.2, 1.1).lerp(v3(2.9, 2.0, 3.6), a);
+    const look = v3(0, 0, 0.2).lerp(v3(0.55, 0.1, 0.45), a);
+    const toBall = ease.inOutSine(seg(lt, 1.2, 1.75));
+    look.lerp(eight.position, toBall);
+    // The dolly lands two frames before the cut, with the camera close enough that the ball fills the frame
+    const dolly = ease.inCubic(seg(lt, 1.6, 2.32));
+    pos.lerp(v3(BX, R + 0.02, ez + 0.17), dolly);
+    aim(cam, pos, look);
+    const focus = lerp(cam.position.distanceTo(v3(0.4, 0.3, 0.3)), cam.position.distanceTo(eight.position), toBall);
+    return { scene, camera: cam, focus, aperture: 0.0012 + 0.002 * dolly, maxblur: 0.012, bloom: 0.15, threshold: 0.95, exposure: 1.0, grain: 0.016, vignette: 0.5 };
+  };
+}
+
+// ================================================================ Shot 4: Zarbulmasal (Android app, store screens)
+function buildZarbulmasal(img) {
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0b1327);
+  scene.environment = ENV;
+  scene.environmentIntensity = 0.5;
+  const cam = makeCamera(30);
+
+  // Navy ground with the app icon's ikat diamond at 17 %, a soft lift in the middle
+  const bg = makeCanvas(2048, 1152);
+  {
+    const { ctx } = bg;
+    ctx.fillStyle = "#0B1327";
+    ctx.fillRect(0, 0, 2048, 1152);
+    const lift = ctx.createRadialGradient(1024, 600, 60, 1024, 600, 1000);
+    lift.addColorStop(0, "rgba(255,255,255,0.07)");
+    lift.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = lift;
+    ctx.fillRect(0, 0, 2048, 1152);
+    ctx.globalAlpha = 0.17;
+    const dh = 1060;
+    const dw = dh * (img.ikat.width / img.ikat.height);
+    ctx.drawImage(img.ikat, 1024 - dw / 2, 600 - dh / 2, dw, dh);
+    ctx.globalAlpha = 1;
+  }
+  const bgMesh = new THREE.Mesh(new THREE.PlaneGeometry(18, 10.125), new THREE.MeshBasicMaterial({ map: texFrom(bg.cv), toneMapped: false }));
+  bgMesh.position.set(0, 0, -4);
+  scene.add(bgMesh);
+  const key = softKey(0xfff2e2, 2.0, v3(-3, 4, 5), 4);
+  const coral = new THREE.DirectionalLight(0xed6a4e, 2.4);
+  coral.position.set(3.5, 1.5, -3);
+  scene.add(key, coral, new THREE.HemisphereLight(0xe8ecff, 0x0b1327, 0.8));
+
+  // ---- three Android phones with the real store screens; home and proverb switch Tajik -> Persian
+  const screens = [
+    { a: img.homeTj, b: img.homeFa },
+    { a: img.proverbTj, b: img.proverbFa },
+    { a: img.poetTj },
+  ].map((s) => {
+    const c = phoneCanvas();
+    return { ...s, c, tex: texFrom(c.cv), last: -1 };
+  });
+  function paintScreen(s, wipe) {
+    const k = Math.round(wipe * 400);
+    if (k === s.last) return;
+    s.last = k;
+    androidScreen(s.c.ctx, (ctx, w, h) => {
+      ctx.fillStyle = "#F2ECDE";
+      ctx.fillRect(0, 0, w, h);
+      const top = 90; // 1290 - 90 = 1200 = the 1:2 store screenshot at 600 wide
+      ctx.drawImage(s.a, 0, top, w, w * 2);
+      if (s.b && wipe > 0) {
+        const x = w * (1 - wipe);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, top, w - x, h - top);
+        ctx.clip();
+        ctx.drawImage(s.b, 0, top, w, w * 2);
+        ctx.restore();
+        if (wipe < 1) {
+          ctx.fillStyle = "#ED6A4E";
+          ctx.fillRect(x - 3, top, 6, h - top);
+        }
+      }
+      statusBar(ctx, w, "#1D1A16");
+    });
+    s.tex.needsUpdate = true;
+  }
+  const bodyMat = physical(0x16171c, { metalness: 0.8, roughness: 0.3, clearcoat: 0.7 });
+  const phones = screens.map((s) => {
+    const p = makePhone(bodyMat, s.tex);
+    scene.add(p);
+    return p;
+  });
+  const FAN = [
+    { p: v3(-1.05, -0.14, -0.35), r: v3(0, 0.32, 0.17), s: 1.0 },
+    { p: v3(0, 0.06, 0.3), r: v3(0, -0.05, 0), s: 1.12 },
+    { p: v3(1.05, -0.14, -0.35), r: v3(0, -0.32, -0.17), s: 1.0 },
+  ];
+
+  return function shot4(lt) {
+    const fan = ease.outQuint(seg(lt, 0.1, 1.0));
+    phones.forEach((ph, i) => {
+      const f = FAN[i];
+      ph.position.copy(v3(0, -0.25, -0.1 + 0.2 * (i === 1)).lerp(f.p, fan));
+      ph.position.y += 0.025 * Math.sin(lt * 1.6 + i * 1.7);
+      ph.rotation.set(-0.04, f.r.y * fan, f.r.z * fan);
+      ph.scale.setScalar(lerp(0.92, f.s, fan));
+    });
+    paintScreen(screens[0], ease.inOutSine(seg(lt, 1.07, 1.77)));
+    paintScreen(screens[1], ease.inOutSine(seg(lt, 0.95, 1.65)));
+    paintScreen(screens[2], 0);
+    const c = ease.inOutSine(seg(lt, 0, 2.4));
+    aim(cam, v3(0.05, 0.18, 6.0).lerp(v3(-0.05, 0.06, 5.05), c), v3(0, -0.02, 0));
+    // Out of black (the 8-ball that filled the frame) into the app's navy
+    const exposure = 0.05 + 0.95 * ease.outCubic(seg(lt, 0, 0.32));
+    return { scene, camera: cam, focus: cam.position.distanceTo(phones[1].position), aperture: 0.0012, maxblur: 0.01, bloom: 0.14, threshold: 0.95, exposure, grain: 0.016, vignette: 0.45 };
   };
 }
