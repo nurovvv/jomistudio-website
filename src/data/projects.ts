@@ -177,9 +177,12 @@ export const projects: Project[] = [
 ];
 
 // Hero showreel (source project: videos/jomi-showreel, rendered at 4K and downscaled).
-// Phones get the lighter 1080p files, larger screens the 1440p ones. Empty `mp4` shows the
+// Phones get `phone`: the 4:5 middle of the 1440p file (all a phone's frame shows) at 864x1080
+// in H.264, which every Android phone decodes in hardware (many decode VP9 on the CPU and stall).
+// Tablets get the 1080p files, larger screens the 1440p ones. Empty `mp4` shows the
 // animated brand placeholder.
 export const showreel = {
+  phone: { mp4: '/showreel/jomi-showreel-phone.mp4' },
   small: { webm: '/showreel/jomi-showreel-1080.webm', mp4: '/showreel/jomi-showreel-1080.mp4' },
   webm: '/showreel/jomi-showreel-1440.webm',
   mp4: '/showreel/jomi-showreel-1440.mp4',
