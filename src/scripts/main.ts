@@ -131,10 +131,15 @@ $$<HTMLVideoElement>('.hero__media video').forEach((v) => {
   if (reduced) {
     v.removeAttribute('autoplay');
     v.pause();
-  } else if (v.paused) {
-    // Some mobile browsers skip the autoplay attribute (data-saver modes); nudge playback once.
-    v.play().catch(() => {});
+    return;
   }
+  // Some mobile browsers skip the autoplay attribute (data-saver modes); nudge playback once.
+  if (v.paused) v.play().catch(() => {});
+  // It plays only while on screen: phones would otherwise keep decoding it down the whole page
+  ScrollTrigger.create({
+    trigger: '.hero__media', start: 'top bottom', end: 'bottom top',
+    onToggle: (s) => (s.isActive ? v.play().catch(() => {}) : v.pause()),
+  });
 });
 
 // Brand placeholder animation inside the showreel
@@ -463,12 +468,20 @@ if (!reduced) {
     },
   });
 
-  // Footer: content rises from underneath, rings breathe
+  // Footer: content rises from underneath, rings breathe. The rings and the glow (CSS, .is-live)
+  // only move while the footer is on screen, so they cost nothing further up the page.
   gsap.from('.footer__cta', {
     yPercent: 25, ease: 'none',
     scrollTrigger: { trigger: '.footer', start: 'top bottom', end: 'top 20%', scrub: true },
   });
-  gsap.to('.footer__rings span', { scale: 1.06, duration: 2.6, repeat: -1, yoyo: true, ease: 'sine.inOut', stagger: { each: 0.25, from: 'start' } });
+  const breathe = gsap.to('.footer__rings span', { scale: 1.06, duration: 2.6, repeat: -1, yoyo: true, ease: 'sine.inOut', stagger: { each: 0.25, from: 'start' }, paused: true });
+  ScrollTrigger.create({
+    trigger: '.footer', start: 'top bottom', end: 'bottom top',
+    onToggle: (s) => {
+      $('.footer').classList.toggle('is-live', s.isActive);
+      s.isActive ? breathe.play() : breathe.pause();
+    },
+  });
 }
 
 /* ---------------- Services: cards open and close with scroll position ---------------- */
